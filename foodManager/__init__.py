@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from food_manager.constants import *
+from foodManager.constants import *
 
 db = SQLAlchemy()
 
@@ -27,5 +27,9 @@ def create_app(test_config=None):
         pass
 
     db.init_app(app)
+
+    from . import models
+    from . import api
+    app.register_blueprint(api.api_bp)
 
     return app

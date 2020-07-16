@@ -64,13 +64,13 @@ def _get_pantry_item(ingredient_id):
 
 def main():
     # prompt user if db already exists
-    if path.exists("test.db"):
+    if path.exists("../foodmanager.db"):
         print("test.db already exists, do you want to initialize the database? (y/n)")
         answer = input(">")
         if answer.lower() == "n":
             exit()
         else:
-            remove("test.db")
+            remove("../foodmanager.db")
     # create db
     db.create_all()
 
@@ -95,4 +95,4 @@ def main():
         print(ing)
 
 if __name__ == "__main__":
-    main()
+   main()

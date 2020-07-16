@@ -1,7 +1,8 @@
 import json
 from flask import Response, request, url_for
-from food_manager.constants import *
-from food_manager.models import *
+from foodManager.constants import *
+from foodManager.models import *
+from foodManager.utils.masonbuilder import MasonBuilder
 
 class ResponseBuilder(MasonBuilder):
 
@@ -9,7 +10,7 @@ class ResponseBuilder(MasonBuilder):
         self.add_control(
             "",
             url_for(),
-            method:"",
+            method="",
             title="",
             encoding="json",
             schema=""
