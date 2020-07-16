@@ -1,0 +1,11 @@
+vegetable,artichoke,kidney beans,peas,broccoli,brussels sprouts,cabbage,cauliflower,celery,collard greens,spinach,basil,oregano,parsley,rosemary,sage,thyme,lettuce,onion,garlic,bell pepper,chili pepper,carrot,ginger,radish,potato,sweet potato,sweet corn,butternut squash,cucumber,tomato,turnip,zuccini,parsnip,eggplant,olive,jalapeño
+fruit,apple,apricot,avocado,banana,bilberry,blackberry,blackcurrant,blueberry,cherry,cloudberry,coconut,cranberry,date,dragonfruit,elderberry,fig,goji berry,grape,raisin,grapefruit,guava,jackfruit,kiwifruit,lemon,lime,mango,melon,cantaloupe,watermelon,nectarine,orange,blood orange,clementine,mandarine,tangerine,papaya,passionfruit,peach,pear,persimmon,plum,pineapple,pomegranate,pomelo,raspberry,satsuma,strawberry,white currant
+meat,mince beef,bacon,sausages,pork,ham,salami,prosciutto,lamb,chicken,turkey,venison,duck,rabbit
+seafood,tuna,trout,pike,cod,salmon,shrimp,lobster,sardines
+dairy,milk,yogurt,quark,skyr,butter,ghee,cheese,cottage cheese,feta,cream cheese,brie,mozzarella,blue cheese,emmental,parmigiano,edam,cream,whipped cream,smetana,sour cream,turkish yogurt
+pasta,macaroni,penne,ravioli,spaghetti,tagliatelle,tortellini,gnocci,fusilli
+rice,basmati rice,jasmine rice,long grain white rice
+bread,baguette,bagel,banana bread,naan,pita,pretzel,rieska,rye bread,tortilla,whole wheat bread,white bread,crisp bread
+spices,salt,black pepper,cumin,curry,nutmeg,oregano,vanilla
+flour,all-purpose flour,pastry flour,bread flour,whole wheat flour,breadcrums
+misc,water
