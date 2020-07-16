@@ -11,10 +11,13 @@ from foodManager.constants import *
 class Users(Resource):
 
     def get(self):
-        return Response("All users..",status=200)
+        user = User.query.first()
+        resp = {"name": user.username, "email": user.email}
+        return Response(json.dumps(resp),status=200)
+
     def post(self):
         pass
-
+"""
 class User(Resource):
 
     def get(self, item):
@@ -23,3 +26,4 @@ class User(Resource):
         pass
     def delete(self, item):
         pass
+"""

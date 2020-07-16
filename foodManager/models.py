@@ -1,12 +1,3 @@
-"""
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-
-app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-db = SQLAlchemy(app)
-"""
 import click
 from flask.cli import with_appcontext
 from foodManager import db
@@ -63,6 +54,34 @@ class PantryItem(db.Model):
     deleted = db.Column(db.Boolean, nullable=False)
 
     pantry = db.relationship("Pantry", back_populates="items")
+
+@click.command("init-db")
+@with_appcontext
+def init_db_command():
+    db.create_all()
+
+@click.command("testgen")
+@with_appcontext
+def generate_test_data():
+    # create test users
+    for i in range(1,6):
+        user = User(
+                username="test_user{:02}".format(i),
+                email="test_user{:02}@test.com".format(i))
+        db.session.add(user)
+    db.session.commit()
+
+    # create ingredients
+    with open('foodManager/utils/db_init_txt/ingredients.txt', 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            splitted_lines = line.split(',')
+            _type = splitted_lines.pop(0)
+            for name in splitted_lines:
+                ingr = Ingredient(name=name, type=_type)
+                db.session.add(ingr)
+        db.session.commit()
+
 
 # these are currently not implemented
 """

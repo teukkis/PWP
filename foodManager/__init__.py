@@ -30,6 +30,10 @@ def create_app(test_config=None):
 
     from . import models
     from . import api
+    app.cli.add_command(models.init_db_command)
+    app.cli.add_command(models.generate_test_data)
     app.register_blueprint(api.api_bp)
+
+
 
     return app
