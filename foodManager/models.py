@@ -19,10 +19,10 @@ class ShoppingList(db.Model):
     name = db.Column(db.String(64), unique=False, nullable=False)
 
     owner = db.relationship("User", back_populates="shopping_lists")
-    items = db.relationship("ShoppingListItem", cascade="all, delete-orphan", back_populates="shopping_list")
+    items = db.relationship("ShoppingListIngredient", cascade="all, delete-orphan", back_populates="shopping_list")
 
 
-class ShoppingListItem(db.Model):
+class ShoppingListIngredient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     shopping_list_id = db.Column(db.Integer, db.ForeignKey("shopping_list.id", ondelete="CASCADE"))
     ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"))
@@ -37,17 +37,17 @@ class Ingredient(db.Model):
     name = db.Column(db.String(64), unique=False, nullable=False)
     type = db.Column(db.String(64), unique=False, nullable=True)
 
-    def __repr__(self):
-        return "{} ({}) <{}>".format(self.name, self.type, self.id)
+    #def __repr__(self):
+    #    return "{} ({}) <{}>".format(self.name, self.type, self.id)
 
 class Pantry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     owner_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=True)
     in_use = db.Column(db.Boolean, unique=False, nullable=False)
 
-    items = db.relationship("PantryItem", back_populates="pantry")
+    items = db.relationship("PantryIngredient", back_populates="pantry")
 
-class PantryItem(db.Model):
+class PantryIngredient(db.Model):
     pantry_id = db.Column(db.Integer, db.ForeignKey("pantry.id"), primary_key=True)
     ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"), primary_key=True)
     add_date = db.Column(db.DateTime, nullable=False)
@@ -64,7 +64,7 @@ def init_db_command():
 @with_appcontext
 def generate_test_data():
     # create test users
-    for i in range(1,6):
+    for i in range(1,7):
         user = User(
                 username="test_user{:02}".format(i),
                 email="test_user{:02}@test.com".format(i))
@@ -77,10 +77,39 @@ def generate_test_data():
         for line in lines:
             splitted_lines = line.split(',')
             _type = splitted_lines.pop(0)
+            last = splitted_lines.pop(-1)
+            ingr = Ingredient(name=last[:-1], type=_type)
+            db.session.add(ingr)
             for name in splitted_lines:
                 ingr = Ingredient(name=name, type=_type)
                 db.session.add(ingr)
         db.session.commit()
+
+
+    # create shoppinglists
+    for user in User.query.all():
+        sl = ShoppingList(owner_id=user.id, name="Personal")
+        db.session.add(sl)
+        db.session.commit()
+        user.shopping_lists.append(sl)
+    with open('foodManager/utils/db_init_txt/shoppinglists.txt', 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            splitted = line.split(',')
+            sl_id = splitted.pop(0)
+            ingr_id = splitted.pop(0)
+            qty = splitted.pop(0)
+            unit = splitted.pop(0)
+            sli = ShoppingListIngredient()
+            sli.shopping_list_id = sl_id
+            sli.ingredient_id = ingr_id
+            if qty != "":
+                sl.quantity = qty
+            if unit != "":
+                sl.unit = unit
+            sl = ShoppingList.query.filter_by(id=sl_id).first()
+            sl.items.append(sli)
+            db.session.commit()
 
 
 # these are currently not implemented

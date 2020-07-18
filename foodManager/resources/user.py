@@ -5,20 +5,25 @@ from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
 from foodManager.models import User
 from foodManager import db
-from foodManager.utils import responseBuilder
+from foodManager.utils.responsebuilder import ResponseBuilder
+from foodManager.utils.masonbuilder import MasonBuilder
 from foodManager.constants import *
 
-class Users(Resource):
+class UserCollection(Resource):
 
     def get(self):
-        user = User.query.first()
-        resp = {"name": user.username, "email": user.email}
-        return Response(json.dumps(resp),status=200)
+        users = User.query.all()
+        body = MasonBuilder(items=[])
+        for user in users:
+            item = {"username": user.username,
+                    "email": user.email}
+            body["items"].append(item)
+        return Response(json.dumps(body),status=200)
 
     def post(self):
         pass
-"""
-class User(Resource):
+
+class UserItem(Resource):
 
     def get(self, item):
         pass
@@ -26,4 +31,3 @@ class User(Resource):
         pass
     def delete(self, item):
         pass
-"""

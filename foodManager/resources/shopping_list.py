@@ -3,9 +3,9 @@ from jsonschema import validate, ValidationError
 from flask import Response, request, url_for
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
-from foodManager.models import ShoppingList
+from foodManager.models import ShoppingList, ShoppingListIngredient
 from foodManager import db
-from foodManager.utils import responseBuilder
+from foodManager.utils.responsebuilder import ResponseBuilder
 from foodManager.constants import *
 
 
@@ -18,7 +18,7 @@ class ShoppingListCollection(Resource):
     def delete(self):
         pass
 
-class ShoppingList(Resource):
+class ShoppingListItem(Resource):
 
     def get(self, item):
         pass
