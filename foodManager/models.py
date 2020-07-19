@@ -1,6 +1,7 @@
 import click
 from flask.cli import with_appcontext
 from foodManager import db
+from datetime import datetime
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -86,12 +87,16 @@ def generate_test_data():
         db.session.commit()
 
 
-    # create shoppinglists
+    # create shoppinglists, (and pantries)
     for user in User.query.all():
         sl = ShoppingList(owner_id=user.id, name="Personal")
+        in_use = user.id%3==0
+        pantry = Pantry(owner_id=user.id, in_use=in_use)
         db.session.add(sl)
+        db.session.add(pantry)
         db.session.commit()
         user.shopping_lists.append(sl)
+    # create shopping list items
     with open('foodManager/utils/db_init_txt/shoppinglists.txt', 'r') as f:
         lines = f.readlines()
         for line in lines:
@@ -110,7 +115,28 @@ def generate_test_data():
             sl = ShoppingList.query.filter_by(id=sl_id).first()
             sl.items.append(sli)
             db.session.commit()
-
+    # create pantry items
+    with open('foodManager/utils/db_init_txt/pantries.txt', 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            splitted = line.split(',')
+            pantry_id = splitted.pop(0)
+            ingr_id = splitted.pop(0)
+            add_date = datetime.now()
+            deleted = splitted.pop(0)[:-1] # remove newline             
+            if deleted == 'false':
+                deleted = False
+            elif deleted == 'true':
+                deleted = True
+            pantry_item = PantryIngredient(
+                                        pantry_id=pantry_id,
+                                        ingredient_id=ingr_id,
+                                        add_date=add_date,
+                                        deleted=deleted
+                                            )
+            pantry = Pantry.query.filter_by(id=pantry_id).first()
+            pantry.items.append(pantry_item)
+            db.session.commit()
 
 # these are currently not implemented
 """
