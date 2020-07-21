@@ -1,3 +1,8 @@
+import json
+from flask import Response, url_for, request
+from foodManager.models import User
+from foodManager.constants import *
+
 class MasonBuilder(dict):
     """
     A convenience class for managing dictionaries that represent Mason
@@ -61,3 +66,41 @@ class MasonBuilder(dict):
 
         self["@controls"][ctrl_name] = kwargs
         self["@controls"][ctrl_name]["href"] = href
+
+class UserBuilder(MasonBuilder):
+    
+    def add_control_add_user(self):
+        self.add_control(
+                        "foodman:add-user",
+                        url_for("api.usercollection"),
+                        method="POST",
+                        encoding="json",
+                        title="Add new user",
+                        schema=User.get_schema()
+                    )
+        
+    def add_control_modify_user(self, username):
+        self.add_control(
+                        "edit",
+                        url_for("api.useritem", username=username),
+                        method="PUT",
+                        encoding="json",
+                        title="Edit this user",
+                        schema=User.get_schema()
+                    )
+    def add_control_delete_user(self, username):
+        self.add_control(
+                        "foodman:delete-user",
+                        url_for("api.useritem", username=username),
+                        method="DELETE",
+                        encoding="json",
+                        title="Delete this user",
+                        schema=User.get_schema()
+                    )
+
+def create_error_response(status_code, title, message=None):
+    resource_url = request.path
+    body = MasonBuilder(resource_url=resource_url)
+    body.add_error(title, message)
+    body.add_control("profile", ERROR_PROFILE)
+    return Response(json.dumps(body), status_code, mimetype=MASON)
