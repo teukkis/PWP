@@ -3,17 +3,17 @@ from jsonschema import validate, ValidationError
 from flask import Response, request, url_for
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
-from foodManager.models import Ingredient
+from foodManager.models import FoodItem
 from foodManager import db
 from foodManager.utils.responsebuilder import ResponseBuilder
 from foodManager.utils.masonbuilder import MasonBuilder
 from foodManager.constants import *
 
-class IngredientCollection(Resource):
+class FoodItemCollection(Resource):
 
     def get(self):
         body = MasonBuilder(items=[])
-        ingredients = Ingredient.query.all()
+        ingredients = FoodItem.query.all()
         for ingr in ingredients:
             body["items"].append({"name": ingr.name, "type": ingr.type, "id": ingr.id})
         return Response(json.dumps(body),status=200)
@@ -21,7 +21,7 @@ class IngredientCollection(Resource):
     def post(self):
         pass
 
-class IngredientItem(Resource):
+class FoodItemItem(Resource):
 
     def get(self, item):
         pass

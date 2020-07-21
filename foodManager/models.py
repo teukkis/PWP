@@ -20,20 +20,20 @@ class ShoppingList(db.Model):
     name = db.Column(db.String(64), unique=False, nullable=False)
 
     owner = db.relationship("User", back_populates="shopping_lists")
-    items = db.relationship("ShoppingListIngredient", cascade="all, delete-orphan", back_populates="shopping_list")
+    items = db.relationship("ShoppingListFoodItem", cascade="all, delete-orphan", back_populates="shopping_list")
 
 
-class ShoppingListIngredient(db.Model):
+class ShoppingListFoodItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     shopping_list_id = db.Column(db.Integer, db.ForeignKey("shopping_list.id", ondelete="CASCADE"))
-    ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"))
+    fooditem_id = db.Column(db.Integer, db.ForeignKey("food_item.id"))
     quantity = db.Column(db.Float, unique=False, nullable=True)
     unit = db.Column(db.String(16), unique=False, nullable=True)
 
     shopping_list = db.relationship("ShoppingList", back_populates="items")
 
 
-class Ingredient(db.Model):
+class FoodItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=False, nullable=False)
     type = db.Column(db.String(64), unique=False, nullable=True)
@@ -46,11 +46,11 @@ class Pantry(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=True)
     in_use = db.Column(db.Boolean, unique=False, nullable=False)
 
-    items = db.relationship("PantryIngredient", back_populates="pantry")
+    items = db.relationship("PantryFoodItem", back_populates="pantry")
 
-class PantryIngredient(db.Model):
+class PantryFoodItem(db.Model):
     pantry_id = db.Column(db.Integer, db.ForeignKey("pantry.id"), primary_key=True)
-    ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"), primary_key=True)
+    fooditem_id = db.Column(db.Integer, db.ForeignKey("food_item.id"), primary_key=True)
     add_date = db.Column(db.DateTime, nullable=False)
     deleted = db.Column(db.Boolean, nullable=False)
 
@@ -72,17 +72,17 @@ def generate_test_data():
         db.session.add(user)
     db.session.commit()
 
-    # create ingredients
-    with open('foodManager/utils/db_init_txt/ingredients.txt', 'r') as f:
+    # create fooditems
+    with open('foodManager/utils/db_init_txt/fooditems.txt', 'r') as f:
         lines = f.readlines()
         for line in lines:
             splitted_lines = line.split(',')
             _type = splitted_lines.pop(0)
             last = splitted_lines.pop(-1)
-            ingr = Ingredient(name=last[:-1], type=_type)
+            ingr = FoodItem(name=last[:-1], type=_type)
             db.session.add(ingr)
             for name in splitted_lines:
-                ingr = Ingredient(name=name, type=_type)
+                ingr = FoodItem(name=name, type=_type)
                 db.session.add(ingr)
         db.session.commit()
 
@@ -105,9 +105,9 @@ def generate_test_data():
             ingr_id = splitted.pop(0)
             qty = splitted.pop(0)
             unit = splitted.pop(0)
-            sli = ShoppingListIngredient()
+            sli = ShoppingListFoodItem()
             sli.shopping_list_id = sl_id
-            sli.ingredient_id = ingr_id
+            sli.fooditem_id = ingr_id
             if qty != "":
                 sl.quantity = qty
             if unit != "":
@@ -128,9 +128,9 @@ def generate_test_data():
                 deleted = False
             elif deleted == 'true':
                 deleted = True
-            pantry_item = PantryIngredient(
+            pantry_item = PantryFoodItem(
                                         pantry_id=pantry_id,
-                                        ingredient_id=ingr_id,
+                                        fooditem_id=ingr_id,
                                         add_date=add_date,
                                         deleted=deleted
                                             )
@@ -150,7 +150,7 @@ class Recipe(db.Model):
 
     creator = db.relationship("User", back_populates="recipes")
     steps = db.relationship("RecipeStep", back_populates="recipe")
-    ingredients = db.relationship("RecipeIngredient",
+    fooditems = db.relationship("RecipeFoodItem",
                                          back_populates="recipe")
 
 
@@ -162,11 +162,11 @@ class RecipeStep(db.Model):
     recipe = db.relationship("Recipe", back_populates="steps")
 
 
-class RecipeIngredient(db.Model):
+class RecipeFoodItem(db.Model):
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), primary_key=True)
-    ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"), primary_key=True)
+    fooditem_id = db.Column(db.Integer, db.ForeignKey("food_item.id"), primary_key=True)
     quantity = db.Column(db.Float, unique=False, nullable=True)
     unit = db.Column(db.String(16), unique=False, nullable=True)
 
-    recipe = db.relationship("Recipe", back_populates="ingredients")
+    recipe = db.relationship("Recipe", back_populates="fooditems")
 """
