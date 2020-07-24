@@ -13,14 +13,17 @@ from foodManager.constants import *
 class UserCollection(Resource):
 
     def get(self):
-        users = User.query.all()
-        body = MasonBuilder(items=[])
-        for user in users:
+        body = UserBuilder(items=[])
+        body.add_namespace("foodman", LINK_RELATIONS_URL)
+        body.add_control("self", url_for("api.usercollection"))
+        body.add_control_add_user()
+        for user in User.query.all():
             item = {"username": user.username,
                     "email": user.email}
             body["items"].append(item)
-        return Response(json.dumps(body),status=200)
-
+        
+        return Response(json.dumps(body), status=200, mimetype=MASON)
+    
     def post(self):
         if not request.json:
             return create_error_response(

@@ -13,6 +13,23 @@ class User(db.Model):
 
     def __repr__(self):
         return "{} <{}>".format(self.username, self.id)
+    
+    @staticmethod
+    def get_schema():
+        schema = {
+            "type": "object",
+            "required": ["username", "email"]
+        }
+        props = schema["properties"] = {}
+        props["username"] = {
+            "description": "Unique username for the user",
+            "type": "string"
+        }
+        props["email"] = {
+            "description": "Unique email for the user",
+            "type": "string"
+        }
+        return schema
 
     @staticmethod
     def get_schema():
