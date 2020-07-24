@@ -17,7 +17,7 @@ class PantryCollection(Resource):
     def delete(self):
         pass
 
-class PantryItem(Resource):
+class PantryFoodItem(Resource):
 
     def get(self, item):
         pass

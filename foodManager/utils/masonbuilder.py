@@ -1,3 +1,9 @@
+import json
+from flask import Response, request, url_for
+from foodManager.constants import *
+from foodManager.models import *
+
+
 class MasonBuilder(dict):
     """
     A convenience class for managing dictionaries that represent Mason
@@ -11,11 +17,9 @@ class MasonBuilder(dict):
         """
         Adds an error element to the object. Should only be used for the root
         object, and only in error scenarios.
-
         Note: Mason allows more than one string in the @messages property (it's
         in fact an array). However we are being lazy and supporting just one
         message.
-
         : param str title: Short title for the error
         : param str details: Longer human-readable description
         """
@@ -30,7 +34,6 @@ class MasonBuilder(dict):
         Adds a namespace element to the object. A namespace defines where our
         link relations are coming from. The URI can be an address where
         developers can find information about our link relations.
-
         : param str ns: the namespace prefix
         : param str uri: the identifier URI of the namespace
         """
@@ -48,10 +51,8 @@ class MasonBuilder(dict):
         if it doesn't exist on the object yet. Technically only certain
         properties are allowed for kwargs but again we're being lazy and don't
         perform any checking.
-
         The allowed properties can be found from here
         https://github.com/JornWildt/Mason/blob/master/Documentation/Mason-draft-2.md
-
         : param str ctrl_name: name of the control (including namespace if any)
         : param str href: target URI for the control
         """

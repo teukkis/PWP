@@ -6,7 +6,6 @@ from sqlalchemy.exc import IntegrityError
 from foodManager.models import FoodItem
 from foodManager import db
 from foodManager.utils.responsebuilder import ResponseBuilder
-from foodManager.utils.masonbuilder import MasonBuilder
 from foodManager.constants import *
 
 class FoodItemCollection(Resource):

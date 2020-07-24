@@ -14,6 +14,23 @@ class User(db.Model):
     def __repr__(self):
         return "{} <{}>".format(self.username, self.id)
 
+    @staticmethod
+    def get_schema():
+        schema = {
+            "type": "object",
+            "required": ["username", "email"]
+        }
+        props = schema["properties"] = {}
+        props["username"] = {
+            "description": "Name for the user",
+            "type": "string"
+        }
+        props["email"] = {
+            "description": "Email for the user",
+            "type": "string"
+        }
+        return schema
+
 class ShoppingList(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     owner_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"))
@@ -22,6 +39,20 @@ class ShoppingList(db.Model):
     owner = db.relationship("User", back_populates="shopping_lists")
     items = db.relationship("ShoppingListFoodItem", cascade="all, delete-orphan", back_populates="shopping_list")
 
+
+    @staticmethod
+    def get_schema():
+        schema = {
+            "type": "object",
+            "required": ["name"]
+        }
+        props = schema["properties"] = {}
+        props["name"] = {
+            "description": "Name for the shopping list",
+            "type": "string"
+        }
+        
+        return schema
 
 class ShoppingListFoodItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
