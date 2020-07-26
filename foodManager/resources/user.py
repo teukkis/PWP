@@ -6,14 +6,14 @@ from sqlalchemy.exc import IntegrityError
 from foodManager.models import User
 from foodManager import db
 from foodManager.utils.responsebuilder import ResponseBuilder, create_error_response
-from foodManager.utils.masonBuilder import MasonBuilder
+from foodManager.utils.masonbuilder import MasonBuilder
 
 from foodManager.constants import *
 
 class UserCollection(Resource):
 
     def get(self):
-        body = UserBuilder(items=[])
+        body = ResponseBuilder(items=[])
         body.add_namespace("foodman", LINK_RELATIONS_URL)
         body.add_control("self", url_for("api.usercollection"))
         body.add_control_add_user()
@@ -21,9 +21,9 @@ class UserCollection(Resource):
             item = {"username": user.username,
                     "email": user.email}
             body["items"].append(item)
-        
+
         return Response(json.dumps(body), status=200, mimetype=MASON)
-    
+
     def post(self):
         if not request.json:
             return create_error_response(
@@ -57,16 +57,16 @@ class UserCollection(Resource):
 class UserItem(Resource):
 
     def get(self, username):
-        foundUser = User.query.filter_by(username=username).first()
-        if foundUser is None:
+        found_user = User.query.filter_by(username=username).first()
+        if found_user is None:
             return create_error_response(
                 404, "Not found",
-                "Any users with the username {} was found".format(username)
+                "No user with the username {} was found".format(username)
             )
-        
+
         body = ResponseBuilder(
-            username=foundUser.username,
-            email=foundUser.email
+            username=found_user.username,
+            email=found_user.email
         )
 
         body.add_namespace("foodman", "/foodmanager/link-relations/")
@@ -78,30 +78,30 @@ class UserItem(Resource):
         return Response(json.dumps(body), 200, mimetype="application/vnd.mason+json")
 
     def put(self, username):
-        foundUser = User.query.filter_by(username=username).first()
-        if foundUser is None:
+        found_user = User.query.filter_by(username=username).first()
+        if found_user is None:
             return create_error_response(
                 404, "Not found",
-                "Any users with the username {} was found".format(username)
+                "No user with the username {} was found".format(username)
             )
-        
+
         if not request.json:
             return create_error_response(
                 415, "Unsupported media type",
                 "Request must be JSON"
             )
-        
+
         try:
             validate(request.json, User.get_schema())
         except ValidationError as error:
             return create_error_response(400, "Invalid JSON document", str(error))
 
-        foundUser.username = request.json["username"]
-        foundUser.email = request.json["email"]
+        found_user.username = request.json["username"]
+        found_user.email = request.json["email"]
 
         body = ResponseBuilder(
-            username=foundUser.username,
-            email=foundUser.email
+            username=found_user.username,
+            email=found_user.email
         )
 
         body.add_namespace("foodman", "/foodmanager/link-relations/")
@@ -121,14 +121,14 @@ class UserItem(Resource):
             )
 
     def delete(self, username):
-        foundUser = User.query.filter_by(username=username).first()
-        if foundUser is None:
+        found_user = User.query.filter_by(username=username).first()
+        if found_user is None:
             return create_error_response(
                 404, "Not found",
-                "Any users with the username {} was found".format(username)
+                "No user with the username {} was found".format(username)
             )
 
-        db.session.delete(foundUser)
+        db.session.delete(found_user)
         db.session.commit()
 
         return Response(status=204)

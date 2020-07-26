@@ -14,8 +14,6 @@ class PantryCollection(Resource):
         pass
     def post(self):
         pass
-    def delete(self):
-        pass
 
 class PantryFoodItem(Resource):
 

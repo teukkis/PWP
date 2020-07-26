@@ -13,7 +13,7 @@ class User(db.Model):
 
     def __repr__(self):
         return "{} <{}>".format(self.username, self.id)
-    
+
     @staticmethod
     def get_schema():
         schema = {
@@ -68,7 +68,7 @@ class ShoppingList(db.Model):
             "description": "Name for the shopping list",
             "type": "string"
         }
-        
+
         return schema
 
 class ShoppingListFoodItem(db.Model):
@@ -80,6 +80,31 @@ class ShoppingListFoodItem(db.Model):
 
     shopping_list = db.relationship("ShoppingList", back_populates="items")
 
+    @staticmethod
+    def get_schema():
+        schema = {
+            "type": "object",
+            "required": ["shopping_list_id, fooditem_id"]
+        }
+        props = schema["properties"] = {}
+        props["shoppinglist_id"] = {
+            "description": "ID of the shoppinglist",
+            "type": "integer"
+        }
+        props["owner_id"] = {
+            "description": "ID of the owner",
+            "type": "integer"
+        }
+        props["quantity"] = {
+            "description": "Quantity of the product",
+            "type": "string"
+        }
+        props["unit"] = {
+            "description": "Unit for the quantity",
+            "type": "string"
+        }
+
+        return schema
 
 class FoodItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -88,6 +113,24 @@ class FoodItem(db.Model):
 
     #def __repr__(self):
     #    return "{} ({}) <{}>".format(self.name, self.type, self.id)
+
+    @staticmethod
+    def get_schema():
+        schema = {
+            "type": "object",
+            "required": ["name"]
+        }
+        props = schema["properties"] = {}
+        props["name"] = {
+            "description": "Name of the ingredient",
+            "type": "string"
+        }
+        props["type"] = {
+            "description": "Type of the ingredient, e.g dairy, meat ..",
+            "type": "string"
+        }
+
+        return schema
 
 class Pantry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -171,7 +214,7 @@ def generate_test_data():
             pantry_id = splitted.pop(0)
             ingr_id = splitted.pop(0)
             add_date = datetime.now()
-            deleted = splitted.pop(0)[:-1] # remove newline             
+            deleted = splitted.pop(0)[:-1] # remove newline
             if deleted == 'false':
                 deleted = False
             elif deleted == 'true':

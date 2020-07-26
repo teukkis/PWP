@@ -2,7 +2,7 @@ import json
 from flask import Response, request, url_for
 from foodManager.constants import *
 from foodManager.models import *
-from foodManager.utils.masonBuilder import MasonBuilder
+from foodManager.utils.masonbuilder import MasonBuilder
 
 
 
@@ -17,10 +17,10 @@ class ResponseBuilder(MasonBuilder):
             title="Delete this user"
         )
 
-    def add_control_add_user(self, username):
+    def add_control_add_user(self):
         self.add_control(
             "foodman:add-user",
-            url_for("api.usercollection", username=username),
+            url_for("api.usercollection"),
             method="POST",
             encoding="json",
             title="Create a new user",
@@ -58,7 +58,7 @@ class ResponseBuilder(MasonBuilder):
             encoding="json",
             schema=ShoppingList.get_schema()
         )
-    
+
     def add_control_delete_shoppinglist(self, username, name):
         self.add_control(
             "foodman:delete",
@@ -67,15 +67,25 @@ class ResponseBuilder(MasonBuilder):
             title="Delete shopping list"
         )
 
-    #Controls for food item
-    def add_control_add_fooditem(self, username, name, fooditem):
+    def add_control_add_fooditem(self, username, sl_name):
         self.add_control(
-            "foodman:add-shoppinglist",
-            url_for("api.shoppinglistcollection", username=username, name=name),
+            "foodman:add-fooditem",
+            url_for("api.shoppinglistcollection", username=username, name=sl_name),
             method="POST",
             encoding="json",
-            title="Create a new shopping list",
-            schema=ShoppingList.get_schema()
+            title="Add ingredient to the shopping list",
+            schema=ShoppingListFoodItem.get_schema()
+        )
+
+    #Controls for food item
+    def add_control_create_fooditem(self):
+        self.add_control(
+            "foodman:create-fooditem",
+            url_for("api.fooditemcollection"),
+            method="POST",
+            encoding="json",
+            title="Add an ingredient to the database",
+            schema=FoodItem.get_schema()
         )
 
     @staticmethod
