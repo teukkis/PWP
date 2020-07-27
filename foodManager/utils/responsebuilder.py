@@ -5,6 +5,7 @@ from foodManager.models import *
 from foodManager.utils.masonbuilder import MasonBuilder
 
 
+
 class ResponseBuilder(MasonBuilder):
 
     #Controls for users
@@ -35,14 +36,6 @@ class ResponseBuilder(MasonBuilder):
             encoding="json",
             schema=User.get_schema()
         )
-    
-    def add_control_get_users(self):
-        self.add_control(
-            "get",
-            url_for("api.usercollection"),
-            method="GET",
-            title="Get users"
-        )
 
 
     #Controls for shopping lists
@@ -65,7 +58,7 @@ class ResponseBuilder(MasonBuilder):
             encoding="json",
             schema=ShoppingList.get_schema()
         )
-    
+
     def add_control_delete_shoppinglist(self, username, name):
         self.add_control(
             "foodman:delete",
@@ -74,15 +67,40 @@ class ResponseBuilder(MasonBuilder):
             title="Delete shopping list"
         )
 
-    #Controls for food item
-    def add_control_add_fooditem(self, username, name, fooditem):
+    def add_control_add_fooditem(self, username, sl_name):
         self.add_control(
-            "foodman:add-shoppinglist",
-            url_for("api.shoppinglistcollection", username=username, name=name),
+            "foodman:add-fooditem",
+            url_for("api.shoppinglistcollection", username=username, name=sl_name),
             method="POST",
             encoding="json",
-            title="Create a new shopping list",
-            schema=ShoppingList.get_schema()
+            title="Add ingredient to the shopping list",
+            schema=ShoppingListFoodItem.get_schema()
+        )
+
+    def add_control_all_shoppinglists(self, username):
+        self.add_control(
+            "foodman:all-shoppinglists",
+            url_for("api.shoppinglistcollection", username=username),
+            method="GET",
+        )
+
+    #Controls for food item
+    def add_control_create_fooditem(self):
+        self.add_control(
+            "foodman:create-fooditem",
+            url_for("api.fooditemcollection"),
+            method="POST",
+            encoding="json",
+            title="Add an ingredient to the database",
+            schema=FoodItem.get_schema()
+        )
+
+    #Pantry
+    def add_control_get_Pantry(self, username):
+        self.add_control(
+            "foodman:get-pantry",
+            url_for("api.pantrycollection", username=username),
+            method="GET",
         )
 
     @staticmethod

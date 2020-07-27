@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from foodManager.constants import *
 from flask_cors import CORS
 
+
 db = SQLAlchemy()
 
 # Based on http://flask.pocoo.org/docs/1.0/tutorial/factory/#the-application-factory

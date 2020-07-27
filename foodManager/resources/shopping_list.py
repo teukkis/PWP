@@ -10,7 +10,7 @@ from foodManager.constants import *
 
 
 class ShoppingListCollection(Resource):
-    
+
     def get(self, username):
         body = ResponseBuilder()
 
@@ -21,13 +21,13 @@ class ShoppingListCollection(Resource):
 
         foundUser = User.query.filter_by(username=username).first()
         foundLists = ShoppingList.query.join(User).filter(User.username == username).all()
-        
+
         if foundUser is None:
             return create_error_response(
                 404, "Not found",
                 "User {} not found".format(username)
             )
-        
+
         for listItem in foundLists:
             item = ResponseBuilder(
                 name=listItem.name
@@ -89,7 +89,7 @@ class ShoppingListItem(Resource):
                 404, "Not found",
                 "No shopping list with the name {} was found for user {}".format(name, username)
             )
-        
+
         body = ResponseBuilder(
             name=foundList.name
         )
@@ -119,7 +119,7 @@ class ShoppingListItem(Resource):
         body.add_control("collection", url_for("api.shoppinglistcollection", username=username))
         body.add_control_edit_shoppinglist(username, name)
         body.add_control_delete_shoppinglist(username, name)
-        body.add_control_add_fooditem(username, name, "fooditem")
+        body.add_control_add_fooditem(username, name)
 
         return Response(json.dumps(body), 200, mimetype="application/vnd.mason+json")
 
@@ -130,13 +130,13 @@ class ShoppingListItem(Resource):
                 404, "Not found",
                 "Can't find a list: {}".format(foundList)
             )
-        
+
         if not request.json:
             return create_error_response(
                 415, "Unsupported media type",
                 "Request must be JSON"
             )
-        
+
         try:
             validate(request.json,ShoppingList.get_schema())
         except ValidationError as error:
