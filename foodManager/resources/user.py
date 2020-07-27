@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from foodManager.models import User
 from foodManager import db
 from foodManager.utils.responsebuilder import ResponseBuilder, create_error_response
-from foodManager.utils.masonBuilder import MasonBuilder
+from foodManager.utils.masonbuilder import MasonBuilder, UserBuilder
 
 from foodManager.constants import *
 

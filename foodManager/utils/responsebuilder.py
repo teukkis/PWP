@@ -2,8 +2,7 @@ import json
 from flask import Response, request, url_for
 from foodManager.constants import *
 from foodManager.models import *
-from foodManager.utils.masonBuilder import MasonBuilder
-
+from foodManager.utils.masonbuilder import MasonBuilder
 
 
 class ResponseBuilder(MasonBuilder):
@@ -17,10 +16,10 @@ class ResponseBuilder(MasonBuilder):
             title="Delete this user"
         )
 
-    def add_control_add_user(self, username):
+    def add_control_add_user(self):
         self.add_control(
             "foodman:add-user",
-            url_for("api.usercollection", username=username),
+            url_for("api.usercollection"),
             method="POST",
             encoding="json",
             title="Create a new user",
@@ -35,6 +34,14 @@ class ResponseBuilder(MasonBuilder):
             title="edit this user",
             encoding="json",
             schema=User.get_schema()
+        )
+    
+    def add_control_get_users(self):
+        self.add_control(
+            "get",
+            url_for("api.usercollection"),
+            method="GET",
+            title="Get users"
         )
 
 
