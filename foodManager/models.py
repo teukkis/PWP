@@ -14,22 +14,6 @@ class User(db.Model):
     def __repr__(self):
         return "{} <{}>".format(self.username, self.id)
 
-    @staticmethod
-    def get_schema():
-        schema = {
-            "type": "object",
-            "required": ["username", "email"]
-        }
-        props = schema["properties"] = {}
-        props["username"] = {
-            "description": "Unique username for the user",
-            "type": "string"
-        }
-        props["email"] = {
-            "description": "Unique email for the user",
-            "type": "string"
-        }
-        return schema
 
     @staticmethod
     def get_schema():
@@ -108,7 +92,7 @@ class ShoppingListFoodItem(db.Model):
 
 class FoodItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=False, nullable=False)
+    name = db.Column(db.String(64), unique=True, nullable=False)
     type = db.Column(db.String(64), unique=False, nullable=True)
 
     #def __repr__(self):
@@ -146,6 +130,25 @@ class PantryFoodItem(db.Model):
     deleted = db.Column(db.Boolean, nullable=False)
 
     pantry = db.relationship("Pantry", back_populates="items")
+
+    @staticmethod
+    def get_schema():
+        schema = {
+            "type": "object",
+            "required": ["fooditem_id"]
+        }
+
+        props = schema["properties"] = {}
+        props["pantry_id"] = {
+            "description": "ID of the pantry",
+            "type": "integer"
+        }
+        props["fooditem_id"] = {
+            "description": "ID of the fooditem",
+            "type": "integer"
+        }
+
+        return schema
 
 @click.command("init-db")
 @with_appcontext

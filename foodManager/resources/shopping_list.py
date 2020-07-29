@@ -31,7 +31,6 @@ class ShoppingListCollection(Resource):
         for listItem in foundLists:
             item = ResponseBuilder(
                 name=listItem.name
-                #maybe fetching items
             )
             item.add_control("self", url_for("api.shoppinglistitem", name=listItem.name, username=username))
             item.add_control("profile", "/profiles/shoppinglist")
