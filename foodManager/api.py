@@ -5,6 +5,8 @@ from flask_restful import Api
 from foodManager.resources import *
 from foodManager.constants import *
 
+from foodManager.models import User
+
 from foodManager.resources.user import UserCollection, UserItem
 from foodManager.resources.shopping_list import ShoppingListCollection, ShoppingListItem, ShoppingListFoodItems
 from foodManager.resources.pantry import PantryCollection, PantryFoodItem
@@ -32,11 +34,26 @@ def entry():
     body = ResponseBuilder()
     body.add_namespace("foodman", LINK_RELATIONS_URL)
     body.add_control(
+            "foodman:add-user",
+            url_for("api.usercollection"),
+            method="POST",
+            encoding="json",
+            title="Create a new user",
+            schema=User.get_schema()
+    )
+    body.add_control(
+            "get",
+            url_for("api.usercollection"),
+            method="GET",
+    )
+    body.add_control(
             "foodman:users-all",
             url_for("api.usercollection"),
+            method="GET"
             )
     body.add_control(
             "foodman:fooditems-all",
             url_for("api.fooditemcollection"),
             )
+    
     return Response(json.dumps(body), 200, mimetype=MASON)
