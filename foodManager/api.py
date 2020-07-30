@@ -9,7 +9,7 @@ from foodManager.models import User
 
 from foodManager.resources.user import UserCollection, UserItem
 from foodManager.resources.shopping_list import ShoppingListCollection, ShoppingListItem, ShoppingListFoodItems
-from foodManager.resources.pantry import PantryCollection, PantryFoodItem
+from foodManager.resources.pantry import PantryCollection, PantryFoodItemItem
 from foodManager.resources.fooditem import FoodItemCollection, FoodItemItem
 from foodManager.utils.responsebuilder import ResponseBuilder
 
@@ -25,7 +25,7 @@ api.add_resource(ShoppingListCollection, "/users/<username>/shoppinglists/")
 api.add_resource(ShoppingListItem, "/users/<username>/shoppinglists/<name>")
 api.add_resource(ShoppingListFoodItems, "/users/<username>/shoppinglists/<name>/<fooditem>")
 api.add_resource(PantryCollection, "/users/<username>/pantry/")
-api.add_resource(PantryFoodItem, "/users/<username>/pantry/<fooditem>")
+api.add_resource(PantryFoodItemItem, "/users/<username>/pantry/<fooditem>")
 api.add_resource(FoodItemCollection, "/fooditems/")
 api.add_resource(FoodItemItem, "/fooditems/<fooditem>")
 
@@ -55,5 +55,5 @@ def entry():
             "foodman:fooditems-all",
             url_for("api.fooditemcollection"),
             )
-    
+
     return Response(json.dumps(body), 200, mimetype=MASON)

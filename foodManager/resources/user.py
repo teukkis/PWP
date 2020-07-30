@@ -75,7 +75,7 @@ class UserItem(Resource):
         body.add_control_edit_user(username)
         body.add_control_delete_user(username)
         body.add_control_all_shoppinglists(username)
-        body.add_control_get_Pantry(username)
+        body.add_control_get_pantry(username)
 
         return Response(json.dumps(body), 200, mimetype="application/vnd.mason+json")
 

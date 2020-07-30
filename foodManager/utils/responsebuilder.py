@@ -61,7 +61,7 @@ class ResponseBuilder(MasonBuilder):
 
     def add_control_delete_shoppinglist(self, username, name):
         self.add_control(
-            "foodman:delete",
+            "delete",
             url_for("api.shoppinglistitem", username=username, name=name),
             method="DELETE",
             title="Delete shopping list"
@@ -111,13 +111,14 @@ class ResponseBuilder(MasonBuilder):
         )
 
     #Pantry
-    def add_control_get_Pantry(self, username):
+    def add_control_get_pantry(self, username):
         self.add_control(
             "foodman:get-pantry",
             url_for("api.pantrycollection", username=username),
             method="GET",
         )
 
+<<<<<<< HEAD
     #foodItem storage
     def add_control_get_all_fooditems(self):
         self.add_control(
@@ -126,6 +127,26 @@ class ResponseBuilder(MasonBuilder):
             method="GET",
         )
 
+=======
+    def add_control_add_pantry_fooditem(self, username):
+        self.add_control(
+            "foodman:add-pantry-fooditem",
+            url_for("api.pantrycollection", username=username),
+            method="POST",
+            encoding="json",
+            title="Add ingredient to pantry",
+            schema=PantryFoodItem.get_schema()
+        )
+
+    def add_control_delete_pantry_fooditem(self, username, fooditem):
+        self.add_control(
+            "delete",
+            url_for("api.pantryfooditemitem",
+                    username=username, fooditem=fooditem),
+            method="DELETE",
+            title="Delete ingredient from pantry",
+        )
+>>>>>>> b3fe7378bf3eaad83bff641e802c62ee4a2383d3
 
     @staticmethod
     def _paginator_schema():
