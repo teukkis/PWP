@@ -39,10 +39,10 @@ class ResponseBuilder(MasonBuilder):
 
 
     #Controls for shopping lists
-    def add_control_add_shoppinglist(self, username, name):
+    def add_control_add_shoppinglist(self, username):
         self.add_control(
             "foodman:add-shoppinglist",
-            url_for("api.shoppinglistcollection", username=username, name=name),
+            url_for("api.shoppinglistcollection", username=username),
             method="POST",
             encoding="json",
             title="Create a new shopping list",
@@ -67,10 +67,18 @@ class ResponseBuilder(MasonBuilder):
             title="Delete shopping list"
         )
 
+    def add_control_delete_shopping_list_item(self, username, name, fooditem):
+        self.add_control(
+            "foodman:delete",
+            url_for("api.shoppinglistfooditems", username=username, name=name, fooditem=fooditem),
+            method="DELETE",
+            title="Delete shopping list food item"
+        )
+
     def add_control_add_fooditem(self, username, sl_name):
         self.add_control(
             "foodman:add-fooditem",
-            url_for("api.shoppinglistcollection", username=username, name=sl_name),
+            url_for("api.shoppinglistitem", username=username, name=sl_name),
             method="POST",
             encoding="json",
             title="Add ingredient to the shopping list",
@@ -82,6 +90,13 @@ class ResponseBuilder(MasonBuilder):
             "foodman:all-shoppinglists",
             url_for("api.shoppinglistcollection", username=username),
             method="GET",
+        )
+
+    def add_control_edit_shopping_list_food_item(self, username, name, fooditem):
+        self.add_control(
+            "foodman:edit-shoppinglistitems",
+            url_for("api.shoppinglistfooditems", username=username, name=name, fooditem=fooditem),
+            method="PUT",
         )
 
     #Controls for food item
@@ -102,6 +117,15 @@ class ResponseBuilder(MasonBuilder):
             url_for("api.pantrycollection", username=username),
             method="GET",
         )
+
+    #foodItem storage
+    def add_control_get_all_fooditems(self):
+        self.add_control(
+            "foodman:all-fooditems",
+            url_for("api.fooditemcollection"),
+            method="GET",
+        )
+
 
     @staticmethod
     def _paginator_schema():

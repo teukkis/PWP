@@ -84,11 +84,15 @@ class ShoppingListFoodItem(db.Model):
     def get_schema():
         schema = {
             "type": "object",
-            "required": ["shopping_list_id, fooditem_id"]
+            "required": ["shopping_list_id", "fooditem_id"]
         }
         props = schema["properties"] = {}
-        props["shoppinglist_id"] = {
+        props["shopping_list_id"] = {
             "description": "ID of the shoppinglist",
+            "type": "integer"
+        }
+        props["fooditem_id"] = {
+            "description": "ID of the item",
             "type": "integer"
         }
         props["owner_id"] = {
@@ -97,7 +101,7 @@ class ShoppingListFoodItem(db.Model):
         }
         props["quantity"] = {
             "description": "Quantity of the product",
-            "type": "string"
+            "type": "integer"
         }
         props["unit"] = {
             "description": "Unit for the quantity",

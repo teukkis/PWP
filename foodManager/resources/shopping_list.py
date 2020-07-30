@@ -1,4 +1,5 @@
 import json
+import sys
 from jsonschema import validate, ValidationError
 from flask import Response, request, url_for
 from flask_restful import Resource
@@ -16,7 +17,7 @@ class ShoppingListCollection(Resource):
 
         body.add_namespace("foodman", "/foodmanager/link-relations/")
         body.add_control("self", url_for("api.shoppinglistcollection", username=username))
-        body.add_control_add_shoppinglist(username, "name")
+        body.add_control_add_shoppinglist(username)
         body["items"] = []
 
         foundUser = User.query.filter_by(username=username).first()
@@ -31,10 +32,10 @@ class ShoppingListCollection(Resource):
         for listItem in foundLists:
             item = ResponseBuilder(
                 name=listItem.name
-                #maybe fetching items
             )
             item.add_control("self", url_for("api.shoppinglistitem", name=listItem.name, username=username))
             item.add_control("profile", "/profiles/shoppinglist")
+            item.add_control_delete_shoppinglist(username, listItem.name)
             body["items"].append(item)
 
         return Response(json.dumps(body), 200, mimetype="application/vnd.mason+json")
@@ -91,27 +92,33 @@ class ShoppingListItem(Resource):
             )
 
         body = ResponseBuilder(
-            name=foundList.name
+            name=foundList.name,
+            id=foundList.id
         )
 
         body["items"] = []
 
-        #foundList = ShoppingList.query.join(User).filter(User.username == username, ShoppingList.name == name).first()
-
         items = (
-            FoodItem.query
-            .join(ShoppingListFoodItem)
+            db.session.query(ShoppingListFoodItem, FoodItem)
+            .join(FoodItem)
             .join(ShoppingList)
             .join(User)
             .filter(User.username == username, ShoppingList.name == name, ShoppingListFoodItem.shopping_list_id == ShoppingList.id, ShoppingListFoodItem.fooditem_id == FoodItem.id)
             ).all()
 
-        for foodItem in items:
+        for shoppingListFoodItem, foodItem in items:
+            print(foodItem)
             item = ResponseBuilder(
-                name=foodItem.name
+                name=foodItem.name,
+                quantity=shoppingListFoodItem.quantity,
+                unit=shoppingListFoodItem.unit,
+                shopping_list_id=shoppingListFoodItem.shopping_list_id,
+                fooditem_id=shoppingListFoodItem.fooditem_id
             )
             item.add_control("self", url_for("api.shoppinglistfooditems", fooditem=foodItem.name, name=name, username=username))
             item.add_control("profile", "/profiles/shoppinglist")
+            item.add_control_delete_shopping_list_item(username, name, foodItem.name)
+            item.add_control_edit_shopping_list_food_item(username, name, foodItem.name)
             body["items"].append(item)
 
         body.add_namespace("foodman", "/foodmanager/link-relations/")
@@ -120,8 +127,47 @@ class ShoppingListItem(Resource):
         body.add_control_edit_shoppinglist(username, name)
         body.add_control_delete_shoppinglist(username, name)
         body.add_control_add_fooditem(username, name)
+        body.add_control_get_all_fooditems()
 
         return Response(json.dumps(body), 200, mimetype="application/vnd.mason+json")
+
+
+
+    def post(self, username, name):
+        if not request.json:
+            return create_error_response(
+                415, "Unsupported media type",
+                "Requests must be JSON"
+            )
+
+        try:
+            validate(request.json, ShoppingListFoodItem.get_schema())
+        except ValidationError as error:
+            return create_error_response(400, "Invalid JSON document", str(error))
+        
+        
+        foundList = ShoppingList.query.join(User).filter(User.username == username, ShoppingList.name == name).first()
+
+        newShoppinglistFoodItem = ShoppingListFoodItem(
+            shopping_list_id=request.json["shopping_list_id"],
+            fooditem_id=request.json["fooditem_id"],
+        )
+
+
+
+        try:
+            db.session.add(newShoppinglistFoodItem)
+            db.session.commit()
+        except IntegrityError:
+            return create_error_response(
+                409, "Already exists",
+                "Food item with the name '{}' already exists.".format(request.json["name"])
+            )
+
+        return Response(status=201)
+
+
+
 
     def put(self, username, name):
         foundList = ShoppingList.query.join(User).filter(User.username == username, ShoppingList.name == name).first()
@@ -149,7 +195,7 @@ class ShoppingListItem(Resource):
         except IntegrityError:
             return create_error_response(
                 409, "Already exists",
-                "You already have a list {}, pick another one".format(username)
+                "You already have a list {}, pick another one".format(name)
             )
 
     def delete(self, username, name):
@@ -160,16 +206,70 @@ class ShoppingListItem(Resource):
                 "Can't find a list: {}".format(username)
             )
 
-        db.session.delete(foundUser)
+        db.session.delete(foundList)
         db.session.commit()
 
         return Response(status=204)
 
 class ShoppingListFoodItems(Resource):
 
-    ## GET one item of a shopping list
-    def get(self, username):
-        pass
+    ## DELETE one shopping list item
+    def delete(self, username, name, fooditem):
+        foundItem = (
+            ShoppingListFoodItem.query
+            .join(FoodItem)
+            .join(ShoppingList)
+            .join(User)
+            .filter(User.username == username, ShoppingList.name == name, ShoppingListFoodItem.shopping_list_id == ShoppingList.id, ShoppingListFoodItem.fooditem_id == FoodItem.id, FoodItem.name == fooditem)
+            ).first()      
 
+        if foundItem is None:
+            return create_error_response(
+                404, "Not found",
+                "Can't find an item: {}".format(fooditem)
+            )
 
+        db.session.delete(foundItem)
+        db.session.commit()
+
+        return Response(status=204)
+
+    def put(self, username, name, fooditem):
+        foundItem = (
+            ShoppingListFoodItem.query
+            .join(FoodItem)
+            .join(ShoppingList)
+            .join(User)
+            .filter(User.username == username, ShoppingList.name == name, ShoppingListFoodItem.shopping_list_id == ShoppingList.id, ShoppingListFoodItem.fooditem_id == FoodItem.id, FoodItem.name == fooditem)
+            ).first() 
+
+        if foundItem is None:
+            return create_error_response(
+                404, "Not found",
+                "Can't find an item: {}".format(fooditem)
+            )
+
+        if not request.json:
+            return create_error_response(
+                415, "Unsupported media type",
+                "Request must be JSON"
+            )
+
+        try:
+            validate(request.json, ShoppingListFoodItem.get_schema())
+        except ValidationError as error:
+            return create_error_response(400, "Invalid JSON document", str(error))
+
+        
+        foundItem.quantity=request.json["quantity"]
+        shopping_list_id=request.json["shopping_list_id"],
+        fooditem_id=request.json["fooditem_id"]
+
+        try:
+            db.session.commit()
+        except IntegrityError:
+            return create_error_response(
+                409, "Already exists",
+                "You already have {} on the list: {}".format(fooditem, name)
+            )
 
