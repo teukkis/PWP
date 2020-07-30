@@ -118,7 +118,6 @@ class ResponseBuilder(MasonBuilder):
             method="GET",
         )
 
-<<<<<<< HEAD
     #foodItem storage
     def add_control_get_all_fooditems(self):
         self.add_control(
@@ -127,7 +126,6 @@ class ResponseBuilder(MasonBuilder):
             method="GET",
         )
 
-=======
     def add_control_add_pantry_fooditem(self, username):
         self.add_control(
             "foodman:add-pantry-fooditem",
@@ -146,7 +144,6 @@ class ResponseBuilder(MasonBuilder):
             method="DELETE",
             title="Delete ingredient from pantry",
         )
->>>>>>> b3fe7378bf3eaad83bff641e802c62ee4a2383d3
 
     @staticmethod
     def _paginator_schema():
