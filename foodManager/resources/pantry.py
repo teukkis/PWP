@@ -46,6 +46,7 @@ class PantryCollection(Resource):
         body.add_control_add_pantry_fooditem(username)
         return Response(json.dumps(body, default=str), 200, mimetype=MASON)
 
+
     def post(self, username):
         if not request.json:
             return create_error_response(

@@ -122,10 +122,10 @@ class FoodItem(db.Model):
 
 class Pantry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    owner_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), unique=True)
     in_use = db.Column(db.Boolean, unique=False, nullable=False)
 
-    items = db.relationship("PantryFoodItem", back_populates="pantry")
+    items = db.relationship("PantryFoodItem", cascade="all, delete-orphan", back_populates="pantry")
 
 class PantryFoodItem(db.Model):
     pantry_id = db.Column(db.Integer, db.ForeignKey("pantry.id"), primary_key=True)
