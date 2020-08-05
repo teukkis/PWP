@@ -18,8 +18,12 @@ class UserCollection(Resource):
         body.add_control("self", url_for("api.usercollection"))
         body.add_control_add_user()
         for user in User.query.all():
-            item = {"username": user.username,
-                    "email": user.email}
+            item = MasonBuilder(
+                    username=user.username,
+                    email=user.email)
+            item.add_control("self", url_for(
+                                        "api.useritem",
+                                        username=user.username))
             body["items"].append(item)
 
         return Response(json.dumps(body), status=200, mimetype=MASON)
