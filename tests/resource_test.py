@@ -51,14 +51,59 @@ def _generate_db_data():
         db.session.add(user)
     db.session.commit()
 
+    # create pantry and shopping list for users
+    users = User.query.all()
+    for user in users:
+        pantry = Pantry(
+                owner_id=user.id,
+                in_use=True
+                )
+        shopping_list = ShoppingList(
+                        owner_id=user.id,
+                        name="personal"
+                        )
+        user.shopping_lists.append(shopping_list)
+        db.session.add(pantry)
+    db.session.commit()
+
+    # create fooditems
+    foods = [
+            ("redbull", "beverage"),
+            ("asahi", "beverage"),
+            ("glenlivet", "beverage")
+            ]
+    for n, t in foods:
+        food = FoodItem(
+                name=n,
+                type=t
+                )
+        db.session.add(food)
+    db.session.commit()
+
+    foods = FoodItem.query.all()
+    pantry = Pantry.query.filter_by(owner_id=1).first()
+    pantryfooditem = PantryFoodItem(
+                        pantry_id=pantry.id,
+                        fooditem_id=foods[0].id,
+                        add_date=datetime.now(),
+                        deleted=False
+                        )
+    sl = ShoppingList.query.filter_by(owner_id=1).first()
+    slfooditem = ShoppingListFoodItem(
+                    shopping_list_id=sl.id,
+                    fooditem_id=foods[2].id,
+                    quantity=1,
+                    unit="bottles"
+                )
+    db.session.add(pantryfooditem)
+    db.session.add(slfooditem)
+
 def _check_namespace(client, response):
     """
     Test that "foodman" namespace is found in the response and
     and the href value can be used to get a valid response.
     """
-    print(response)
     namespace_href = response["@namespaces"]["foodman"]["name"]
-    print(namespace_href)
     resp = client.get(namespace_href)
     assert resp.status_code == 200
 
@@ -67,7 +112,6 @@ def _check_control_get(ctrl, client, obj):
     Tests the existence of a control that uses get method
     and also that the href of the control works.
     """
-    print(dict(obj).keys())
     href = obj["@controls"][ctrl]["href"]
     resp = client.get(href)
     assert resp.status_code == 200
@@ -78,6 +122,7 @@ def _get_user_json():
     """
     return {"username": "dummy_user", "email": "dummy@user.com"}
 
+
 class TestUserCollection(object):
     RESOURCE_URL = "/api/users/"
 
@@ -85,10 +130,13 @@ class TestUserCollection(object):
         response = client.get(self.RESOURCE_URL)
         assert response.status_code == 200
         resp_body = json.loads(response.data)
-        #_check_namespace(client, resp_body)
+        _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
+        _check_control_get("foodman:add-user", client, resp_body)
         assert len(resp_body["items"]) == 2
         for item in resp_body["items"]:
+            assert "username" in item
+            assert "email" in item
             _check_control_get("self", client, item)
 
     def test_post(self, client):
@@ -120,41 +168,82 @@ class TestUserCollection(object):
 
 class TestUserItem(object):
     RESOURCE_URL = "/api/users/test_user1"
+    INVALID_URL = "/api/users/nobody"
 
     def test_get(self, client):
         response = client.get(self.RESOURCE_URL)
         assert response.status_code == 200
         resp_body = json.loads(response.data)
-        #_check_namespace(client, resp_body)
+        _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
         _check_control_get("collection", client, resp_body)
-        #_check_control_get("foodman:add-user", client, resp_body)
+
+        # test invalid invalid url
+        response = client.get(self.INVALID_URL)
+        assert response.status_code == 404
 
 class TestShoppingListCollection(object):
-    RESOURCE_URL = "/api/users/test_user01/shoppinglists/"
+    RESOURCE_URL = "/api/users/test_user1/shoppinglists/"
 
+    def test_get(self, client):
+        response = client.get(self.RESOURCE_URL)
+        assert response.status_code == 200
+        resp_body = json.loads(response.data)
+        _check_namespace(client, resp_body)
+        _check_control_get("self", client, resp_body)
 
 
 
 class TestShoppingListItem(object):
-    RESOURCE_URL = "/api/users/test_user01/shoppinglists/personal/"
+    RESOURCE_URL = "/api/users/test_user1/shoppinglists/personal"
 
+    def test_get(self, client):
+        response = client.get(self.RESOURCE_URL)
+        assert response.status_code == 200
+        resp_body = json.loads(response.data)
+        _check_namespace(client, resp_body)
+        _check_control_get("self", client, resp_body)
 
 class TestShoppingListFoodItems(object):
-    RESOURCE_URL = "/api/users/test_user01/shoppinglists/personal/whisky/"
-
+    RESOURCE_URL = "/api/users/test_user1/shoppinglists/personal/glenlivet"
 
 class TestPantryCollection(object):
-    RESOURCE_URL = "/api/users/test_user01/pantry/"
+    RESOURCE_URL = "/api/users/test_user1/pantry/"
 
+
+    def test_get(self, client):
+        response = client.get(self.RESOURCE_URL)
+        assert response.status_code == 200
+        resp_body = json.loads(response.data)
+        _check_namespace(client, resp_body)
+        _check_control_get("self", client, resp_body)
 
 class TestPantryFoodItemItem(object):
-    RESOURCE_URL = "/api/users/test_user01/pantry/redbull/"
+    RESOURCE_URL = "/api/users/test_user1/pantry/redbull"
 
+    def test_get(self, client):
+        response = client.get(self.RESOURCE_URL)
+        assert response.status_code == 200
+        resp_body = json.loads(response.data)
+        _check_namespace(client, resp_body)
+        _check_control_get("self", client, resp_body)
 
 class TestFoodItemCollection(object):
     RESOURCE_URL = "/api/fooditems/"
 
+    def test_get(self, client):
+        response = client.get(self.RESOURCE_URL)
+        assert response.status_code == 200
+        resp_body = json.loads(response.data)
+        _check_namespace(client, resp_body)
+        _check_control_get("self", client, resp_body)
 
 class TestFoodItemItem(object):
-    RESOURCE_URL = "/api/fooditems/asahi/"
+    RESOURCE_URL = "/api/fooditems/asahi"
+
+    def test_get(self, client):
+        response = client.get(self.RESOURCE_URL)
+        assert response.status_code == 200
+        resp_body = json.loads(response.data)
+        _check_namespace(client, resp_body)
+        _check_control_get("self", client, resp_body)
