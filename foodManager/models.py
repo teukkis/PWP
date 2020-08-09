@@ -128,7 +128,7 @@ class Pantry(db.Model):
     items = db.relationship("PantryFoodItem", cascade="all, delete-orphan", back_populates="pantry")
 
 class PantryFoodItem(db.Model):
-    pantry_id = db.Column(db.Integer, db.ForeignKey("pantry.id"), primary_key=True)
+    pantry_id = db.Column(db.Integer, db.ForeignKey("pantry.id", ondelete="CASCADE"), primary_key=True)
     fooditem_id = db.Column(db.Integer, db.ForeignKey("food_item.id"), primary_key=True)
     add_date = db.Column(db.DateTime, nullable=False)
     deleted = db.Column(db.Boolean, nullable=False)

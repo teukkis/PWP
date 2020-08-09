@@ -42,8 +42,8 @@ def client():
     os.unlink(db_fname)
 
 def _generate_db_data():
-    # create two users
-    for i in range(1, 3):
+    # create three users
+    for i in range(1, 4):
         user = User(
                 username="test_user{}".format(i),
                 email="test{}@test.com".format(i)
@@ -97,6 +97,10 @@ def _generate_db_data():
                 )
     db.session.add(pantryfooditem)
     db.session.add(slfooditem)
+    db.session.commit()
+
+# following helper functions heavily inspired by
+# https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/tests/resource_test.py
 
 def _check_namespace(client, response):
     """
@@ -109,18 +113,63 @@ def _check_namespace(client, response):
 
 def _check_control_get(ctrl, client, obj):
     """
-    Tests the existence of a control that uses get method
+    Tests the existence of a control that uses GET method
     and also that the href of the control works.
     """
     href = obj["@controls"][ctrl]["href"]
+    print(href)
     resp = client.get(href)
     assert resp.status_code == 200
 
-def _get_user_json():
+def _check_control_post(ctrl, client, obj, json_func):
+    """
+    Validates the href, method, encoding and schema for POST.
+    """
+    ctrl_obj = obj["@controls"][ctrl]
+    href = ctrl_obj["href"]
+    method = ctrl_obj["method"].lower()
+    encoding = ctrl_obj["encoding"].lower()
+    schema = ctrl_obj["schema"]
+    assert method == "post"
+    assert encoding == "json"
+    body = json_func()
+    validate(body, schema)
+    resp = client.post(href, json=body)
+    assert resp.status_code == 201
+
+def _check_control_put(ctrl, client, obj, json_func):
+    """
+    """
+
+    ctrl_obj = obj["@controls"][ctrl]
+    href = ctrl_obj["href"]
+    method = ctrl_obj["method"].lower()
+    encoding = ctrl_obj["encoding"].lower()
+    schema = ctrl_obj["schema"]
+    assert method == "put"
+    assert encoding == "json"
+    body = json_func()
+    body["username"] = obj["username"]
+    body["email"] = obj["email"]
+    validate(body, schema)
+    resp = client.put(href, json=body)
+    assert resp.status_code == 200
+
+def _check_control_delete(ctrl, client, obj):
+    """
+    """
+
+    href = obj["@controls"][ctrl]["href"]
+    method = obj["@controls"][ctrl]["method"].lower()
+    assert method == "delete"
+    resp = client.delete(href)
+    assert resp.status_code == 204
+
+def _get_user_json(username="dummy_user", email="dummy@user.com"):
     """
     Creates a dummy user json to be used in tests.
     """
-    return {"username": "dummy_user", "email": "dummy@user.com"}
+    return {"username": username, "email": email}
 
 
 class TestUserCollection(object):
@@ -132,8 +181,11 @@ class TestUserCollection(object):
         resp_body = json.loads(response.data)
         _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
-        _check_control_get("foodman:add-user", client, resp_body)
-        assert len(resp_body["items"]) == 2
+        _check_control_post("foodman:add-user",
+                            client,
+                            resp_body,
+                            _get_user_json)
+        assert len(resp_body["items"]) == 3
         for item in resp_body["items"]:
             assert "username" in item
             assert "email" in item
@@ -167,19 +219,71 @@ class TestUserCollection(object):
         assert resp.status_code == 400
 
 class TestUserItem(object):
-    RESOURCE_URL = "/api/users/test_user1"
+    RESOURCE_URL1 = "/api/users/test_user1"
+    RESOURCE_URL2 = "/api/users/test_user2"
     INVALID_URL = "/api/users/nobody"
 
     def test_get(self, client):
-        response = client.get(self.RESOURCE_URL)
+        # test valid get
+        response = client.get(self.RESOURCE_URL1)
         assert response.status_code == 200
         resp_body = json.loads(response.data)
+
+        # test namespace and controls
         _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
         _check_control_get("collection", client, resp_body)
+        _check_control_put("edit", client, resp_body, _get_user_json)
+        _check_control_delete("delete", client, resp_body)
 
         # test invalid invalid url
         response = client.get(self.INVALID_URL)
+        assert response.status_code == 404
+
+    def test_put(self, client):
+        # change username
+        user = _get_user_json("herbert", "test1@test.com")
+
+        # invalid content type
+        response = client.put(self.RESOURCE_URL1, data=json.dumps(user))
+        assert response.status_code == 415
+
+        # valid put
+        response = client.put(self.RESOURCE_URL1, json=user)
+        assert response.status_code == 200
+        resp_body = json.loads(response.data)
+
+        # test namespace and controls
+        _check_namespace(client, resp_body)
+        _check_control_get("self", client, resp_body)
+        _check_control_get("collection", client, resp_body)
+        _check_control_put("edit", client, resp_body, _get_user_json)
+        _check_control_delete("delete", client, resp_body)
+
+        # user not found
+        response = client.put(self.INVALID_URL, json=user)
+        assert response.status_code == 404
+
+        # username already exists
+        user["username"] = "test_user3"
+        user["email"] = "test2@test.com"
+        response = client.put(self.RESOURCE_URL2, json=user)
+        assert response.status_code == 409
+
+        # email already exists
+        user["username"] = "test_user2"
+        user["email"] = "test3@test.com"
+        response = client.put(self.RESOURCE_URL2, json=user)
+        assert response.status_code == 409
+
+
+    def test_delete(self, client):
+        # valid delete
+        response = client.delete(self.RESOURCE_URL1)
+        assert response.status_code == 204
+
+        # try to delete same user again
+        response = client.delete(self.RESOURCE_URL1)
         assert response.status_code == 404
 
 class TestShoppingListCollection(object):
@@ -204,8 +308,28 @@ class TestShoppingListItem(object):
         _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
 
+    def test_delete(self, client):
+        # valid delete
+        response = client.delete(self.RESOURCE_URL)
+        assert response.status_code == 204
+
+        # try to delete same shopping list again
+        response = client.delete(self.RESOURCE_URL)
+        assert response.status_code == 404
+
+
 class TestShoppingListFoodItems(object):
     RESOURCE_URL = "/api/users/test_user1/shoppinglists/personal/glenlivet"
+
+
+    def test_delete(self, client):
+        # valid delete
+        response = client.delete(self.RESOURCE_URL)
+        assert response.status_code == 204
+
+        # try to delete same shopping list item again
+        response = client.delete(self.RESOURCE_URL)
+        assert response.status_code == 404
 
 class TestPantryCollection(object):
     RESOURCE_URL = "/api/users/test_user1/pantry/"
