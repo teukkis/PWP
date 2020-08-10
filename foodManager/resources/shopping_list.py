@@ -34,7 +34,10 @@ class ShoppingListCollection(Resource):
                 name=listItem.name
             )
             item.add_control("self", url_for("api.shoppinglistitem", name=listItem.name, username=username))
+            item.add_control("collection", url_for("api.shoppinglistcollection", username=username))
             item.add_control("profile", "/profiles/shoppinglist")
+            item.add_control_add_fooditem(username, listItem.name)
+            item.add_control_edit_shoppinglist(username, listItem.name)
             item.add_control_delete_shoppinglist(username, listItem.name)
             body["items"].append(item)
 
@@ -59,7 +62,20 @@ class ShoppingListCollection(Resource):
             name=request.json["name"],
             owner_id=user.id
         )
+        # model allows same shopping list name for multiple shopping lists
+        # but resource URL is based on the name being unique..
+        # dirty fix:
+        sls = ShoppingList.query.filter_by(owner_id=user.id).all()
+        for sl in sls:
+            if sl.name == request.json["name"]:
+                return create_error_response(
+                        409, "Already exists",
+                        "Shopping list with the name '{}' already exists.".format(request.json["name"]))
 
+        db.session.add(shoppinglist)
+        db.session.commit()
+
+        """
         try:
             db.session.add(shoppinglist)
             db.session.commit()
@@ -68,6 +84,7 @@ class ShoppingListCollection(Resource):
                 409, "Already exists",
                 "Shopping list with the name '{}' already exists.".format(request.json["name"])
             )
+        """
 
         return Response(status=201, headers={
             "Location": url_for("api.shoppinglistitem", username=username, name=request.json["name"])
@@ -144,8 +161,8 @@ class ShoppingListItem(Resource):
             validate(request.json, ShoppingListFoodItem.get_schema())
         except ValidationError as error:
             return create_error_response(400, "Invalid JSON document", str(error))
-        
-        
+
+
         foundList = ShoppingList.query.join(User).filter(User.username == username, ShoppingList.name == name).first()
 
         newShoppinglistFoodItem = ShoppingListFoodItem(
@@ -221,7 +238,7 @@ class ShoppingListFoodItems(Resource):
             .join(ShoppingList)
             .join(User)
             .filter(User.username == username, ShoppingList.name == name, ShoppingListFoodItem.shopping_list_id == ShoppingList.id, ShoppingListFoodItem.fooditem_id == FoodItem.id, FoodItem.name == fooditem)
-            ).first()      
+            ).first()
 
         if foundItem is None:
             return create_error_response(
@@ -241,7 +258,7 @@ class ShoppingListFoodItems(Resource):
             .join(ShoppingList)
             .join(User)
             .filter(User.username == username, ShoppingList.name == name, ShoppingListFoodItem.shopping_list_id == ShoppingList.id, ShoppingListFoodItem.fooditem_id == FoodItem.id, FoodItem.name == fooditem)
-            ).first() 
+            ).first()
 
         if foundItem is None:
             return create_error_response(
@@ -260,7 +277,7 @@ class ShoppingListFoodItems(Resource):
         except ValidationError as error:
             return create_error_response(400, "Invalid JSON document", str(error))
 
-        
+
         foundItem.quantity=request.json["quantity"]
         shopping_list_id=request.json["shopping_list_id"],
         fooditem_id=request.json["fooditem_id"]

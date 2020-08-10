@@ -149,8 +149,8 @@ def _check_control_put(ctrl, client, obj, json_func):
     assert method == "put"
     assert encoding == "json"
     body = json_func()
-    body["username"] = obj["username"]
-    body["email"] = obj["email"]
+    for key in body.keys():
+        body[key] = obj[key]
     validate(body, schema)
     resp = client.put(href, json=body)
     assert resp.status_code == 200
@@ -171,6 +171,23 @@ def _get_user_json(username="dummy_user", email="dummy@user.com"):
     """
     return {"username": username, "email": email}
 
+
+def _get_sl_json(name="family"):
+    """
+    Creates a dummy shoppinglist json to be used in tests.
+    """
+    return {"name": name}
+
+def _get_slfooditem_json(sl_id=1, fi_id=1):
+    """
+    Creates a dummy shoppinglist fooditem json to be used in tests.
+    """
+    return {
+            "shopping_list_id": sl_id,
+            "fooditem_id": fi_id,
+            "quantity": 2,
+            "unit": "pieces",
+            }
 
 class TestUserCollection(object):
     RESOURCE_URL = "/api/users/"
@@ -288,15 +305,63 @@ class TestUserItem(object):
 
 class TestShoppingListCollection(object):
     RESOURCE_URL = "/api/users/test_user1/shoppinglists/"
+    INVALID_URL = "/api/users/nobody/shoppinglists/"
 
     def test_get(self, client):
+        # valid get
         response = client.get(self.RESOURCE_URL)
         assert response.status_code == 200
         resp_body = json.loads(response.data)
+        # check namespace and controls for collection
         _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
+        _check_control_get("foodman:add-shoppinglist", client, resp_body)
 
+        for item in resp_body["items"]:
+            # check namespace and controls for items
+            assert "name" in item
+            _check_control_get("self", client, item)
+            _check_control_get("collection", client, item)
+            _check_control_post("foodman:add-fooditem", client, item, _get_slfooditem_json)
+            _check_control_put("edit", client, item, _get_sl_json)
+            _check_control_get("profile", client, item)
+            _check_control_delete("delete", client, item)
 
+        # invalid get
+        response = client.get(self.INVALID_URL)
+        assert response.status_code == 404
+
+    def test_post(self, client):
+        sl_json = _get_sl_json()
+
+        # invalid content type
+        resp = client.post(self.RESOURCE_URL, data=json.dumps(sl_json))
+        assert resp.status_code == 415
+
+        # valid post
+        resp = client.post(self.RESOURCE_URL, json=sl_json)
+        assert resp.status_code == 201
+
+        # location header looks correct
+        assert resp.headers["Location"].endswith(self.RESOURCE_URL + sl_json["name"])
+
+        # location headers url works
+        resp = client.get(resp.headers["Location"])
+        assert resp.status_code == 200
+
+        # duplicate data
+        resp = client.post(self.RESOURCE_URL, json=sl_json)
+        assert resp.status_code == 409
+
+        # empty json
+        sl_json.pop("name")
+        resp = client.post(self.RESOURCE_URL, json=sl_json)
+        assert resp.status_code == 415
+
+        # invalid json
+        sl_json["slname"] = "personal"
+        resp = client.post(self.RESOURCE_URL, json=sl_json)
+        assert resp.status_code == 400
 
 class TestShoppingListItem(object):
     RESOURCE_URL = "/api/users/test_user1/shoppinglists/personal"
@@ -307,6 +372,7 @@ class TestShoppingListItem(object):
         resp_body = json.loads(response.data)
         _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
+
 
     def test_delete(self, client):
         # valid delete
@@ -352,6 +418,15 @@ class TestPantryFoodItemItem(object):
         _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
 
+    def test_delete(self, client):
+        # valid delete
+        response = client.delete(self.RESOURCE_URL)
+        assert response.status_code == 204
+
+        # try to delete same shopping list item again
+        response = client.delete(self.RESOURCE_URL)
+        assert response.status_code == 404
+
 class TestFoodItemCollection(object):
     RESOURCE_URL = "/api/fooditems/"
 
@@ -371,3 +446,4 @@ class TestFoodItemItem(object):
         resp_body = json.loads(response.data)
         _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
+
