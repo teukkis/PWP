@@ -79,10 +79,6 @@ class ShoppingListFoodItem(db.Model):
             "description": "ID of the item",
             "type": "integer"
         }
-        props["owner_id"] = {
-            "description": "ID of the owner",
-            "type": "integer"
-        }
         props["quantity"] = {
             "description": "Quantity of the product",
             "type": "integer"
