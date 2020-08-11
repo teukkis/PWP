@@ -230,6 +230,45 @@ class ShoppingListItem(Resource):
 
 class ShoppingListFoodItems(Resource):
 
+    def get(self, username, name, fooditem):
+        foundUser = User.query.filter_by(username=username).first()
+        if foundUser is None:
+            return create_error_response(
+                404, "Not found",
+                "User {} not found".format(username)
+            )
+
+        foundList = ShoppingList.query.join(User).filter(User.username == username, ShoppingList.name == name).first()
+        if foundList is None:
+            return create_error_response(
+                404, "Not found",
+                "No shopping list with the name {} was found for user {}".format(name, username)
+            )
+
+        foundFoodItem = FoodItem.query.filter_by(name=fooditem).first()
+        if foundFoodItem is None:
+            return create_error_response(
+                404, "Not found",
+                "Fooditem {} was not found".format(fooditem)
+            )
+
+        foundListFoodItem = ShoppingListFoodItem.query.filter_by(
+                shopping_list_id=foundList.id,
+                fooditem_id=foundFoodItem.id
+                ).first()
+        if foundListFoodItem is None:
+            return create_error_response(
+                404, "Not found",
+                "Fooditem {} was not found in shopping list".format(fooditem)
+            )
+
+        body = ResponseBuilder(
+            name=foundFoodItem.name,
+            quantity=foundListFoodItem.quantity,
+            unit=foundListFoodItem.unit,
+
+        )
+
     ## DELETE one shopping list item
     def delete(self, username, name, fooditem):
         foundItem = (

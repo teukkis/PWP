@@ -171,6 +171,11 @@ def _get_user_json(username="dummy_user", email="dummy@user.com"):
     """
     return {"username": username, "email": email}
 
+def _get_fi_json(name="clontarf",type="beverage"):
+    """
+    Creates a dummy fooditem json to be used in tests.
+    """
+    return {"name": name, "type": type}
 
 def _get_sl_json(name="family"):
     """
@@ -293,7 +298,6 @@ class TestUserItem(object):
         response = client.put(self.RESOURCE_URL2, json=user)
         assert response.status_code == 409
 
-
     def test_delete(self, client):
         # valid delete
         response = client.delete(self.RESOURCE_URL1)
@@ -302,6 +306,7 @@ class TestUserItem(object):
         # try to delete same user again
         response = client.delete(self.RESOURCE_URL1)
         assert response.status_code == 404
+
 
 class TestShoppingListCollection(object):
     RESOURCE_URL = "/api/users/test_user1/shoppinglists/"
@@ -363,16 +368,30 @@ class TestShoppingListCollection(object):
         resp = client.post(self.RESOURCE_URL, json=sl_json)
         assert resp.status_code == 400
 
+
 class TestShoppingListItem(object):
     RESOURCE_URL = "/api/users/test_user1/shoppinglists/personal"
+    INVALID_USER_URL = "/api/users/nobody/shoppinglists/personal"
 
     def test_get(self, client):
+        # valid get
         response = client.get(self.RESOURCE_URL)
         assert response.status_code == 200
         resp_body = json.loads(response.data)
+
+
+        for item in resp_body["items"]:
+            print(item)
+            _check_control_get("self", client, item)
+
+        # check namespace and controls
         _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
-
+        _check_control_get("collection", client, resp_body)
+        _check_control_get("foodman:all-fooditems", client, resp_body)
+        _check_control_post("foodman:add-fooditem", client, resp_body, _get_slfooditem_json)
+        _check_control_put("edit", client, resp_body, _get_sl_json)
+        _check_control_delete("delete", client, resp_body)
 
     def test_delete(self, client):
         # valid delete
@@ -397,6 +416,7 @@ class TestShoppingListFoodItems(object):
         response = client.delete(self.RESOURCE_URL)
         assert response.status_code == 404
 
+
 class TestPantryCollection(object):
     RESOURCE_URL = "/api/users/test_user1/pantry/"
 
@@ -407,6 +427,7 @@ class TestPantryCollection(object):
         resp_body = json.loads(response.data)
         _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
+
 
 class TestPantryFoodItemItem(object):
     RESOURCE_URL = "/api/users/test_user1/pantry/redbull"
@@ -427,23 +448,71 @@ class TestPantryFoodItemItem(object):
         response = client.delete(self.RESOURCE_URL)
         assert response.status_code == 404
 
+
 class TestFoodItemCollection(object):
     RESOURCE_URL = "/api/fooditems/"
 
     def test_get(self, client):
+        # valid get
         response = client.get(self.RESOURCE_URL)
         assert response.status_code == 200
         resp_body = json.loads(response.data)
+
+        # check namespace and controls
         _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
+        _check_control_post("foodman:create-fooditem", client, resp_body, _get_fi_json)
+
+        # check items
+        for item in resp_body["items"]:
+            assert "name" in item
+            assert "type" in item
+            _check_control_get("self", client, item)
+            _check_control_get("collection", client, item)
+
+    def test_post(self, client):
+        fi_json = _get_fi_json()
+
+        # invalid content type
+        resp = client.post(self.RESOURCE_URL, data=json.dumps(fi_json))
+        assert resp.status_code == 415
+
+        # valid post
+        resp = client.post(self.RESOURCE_URL, json=fi_json)
+        assert resp.status_code == 201
+
+        # location header looks correct
+        assert resp.headers["Location"].endswith(self.RESOURCE_URL + fi_json["name"])
+
+        # location headers url works
+        resp = client.get(resp.headers["Location"])
+        assert resp.status_code == 200
+
+        # duplicate data
+        resp = client.post(self.RESOURCE_URL, json=fi_json)
+        assert resp.status_code == 409
+
+        # invalid json
+        fi_json.pop("name")
+        resp = client.post(self.RESOURCE_URL, json=fi_json)
+        assert resp.status_code == 415
 
 class TestFoodItemItem(object):
     RESOURCE_URL = "/api/fooditems/asahi"
+    INVALID_URL = "/api/fooditems/tsingtao"
 
     def test_get(self, client):
+        # valid get
         response = client.get(self.RESOURCE_URL)
         assert response.status_code == 200
         resp_body = json.loads(response.data)
+
+        # check namespace and controls
         _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
+        _check_control_get("collection", client, resp_body)
+
+        # invalid get
+        response = client.get(self.INVALID_URL)
+        assert response.status_code == 404
 
