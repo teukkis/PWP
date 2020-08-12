@@ -16,7 +16,11 @@ and activate environment `. food_manager_env/bin/activate`.
 Unit and functional tests reside in `foodManager/tests`.
 To run these tests:
 1. Make sure you have pytest installed. If you don't, run `pip install pytest`
-2. Navigate to project root and run `pytest tests/`. 
+2. Navigate to project root and run `pytest tests/`.
+
+In case the above instructions give ModuleNotFoundError, you can try the following:
+1. Install pytest inside the environment: `pip install pytest`while the environment is activated.
+2. Inside the project root, run `python -m pytest tests/`
 
 # Food Manager Client
 
