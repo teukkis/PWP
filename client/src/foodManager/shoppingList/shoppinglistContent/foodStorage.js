@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import services from '../../../services'
-import { setShoppingList, checkShoppingList } from '../shoppingListRedux'
+import { setShoppingList } from '../shoppingListRedux'
 import { sendfoodStorage } from '../foodStorageRedux'
 
 import { makeStyles } from '@material-ui/core/styles'
@@ -72,7 +72,7 @@ const FoodStorage = () => {
             })
         }
         
-    }, [shoppinglist, message])
+    }, [shoppinglist, message, dispatch])
 
 
     const columns = [
@@ -85,7 +85,7 @@ const FoodStorage = () => {
         
         return foodStorage.items.map((row) => {
             return (
-                <TableRow key={row.id} hover role="checkbox" tabIndex={-1} key={row.name}>
+                <TableRow key={row.id} hover role="checkbox" tabIndex={-1}>
                     <TableCell>
                         {row.name}
                     </TableCell>

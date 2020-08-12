@@ -1,8 +1,4 @@
-import service from '../services'
-
 const SET_USER = "SET_USER"
-const GET_USER = "GET_USER"
-
 
 const initialState = {
     user: {}

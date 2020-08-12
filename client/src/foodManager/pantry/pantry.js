@@ -45,7 +45,7 @@ const Pantry = () => {
         if (profile['@controls'] !== undefined) {
             const endpoint = profile['@controls']['foodman:get-pantry'].href
             const method = profile['@controls']['foodman:get-pantry'].method
-            
+            console.log(profile)
             services
             .getResource( endpoint, method )
             .then(response => {
@@ -53,7 +53,7 @@ const Pantry = () => {
             })
         }
         
-    }, [profile, message])
+    }, [profile, message, dispatch])
 
     const columns = [
         { id: 'name', label: 'Name', minWidth: 150 },
@@ -120,10 +120,10 @@ const Pantry = () => {
             <TableContainer className={classes.container}>
                 <Table stickyHeader aria-label="sticky table">
                 <TableHead>
-                    {pantry['@controls'] !== undefined ? renderHeaders() : <TableRow/>}         
+                    {pantry.items !== undefined ? renderHeaders() : <TableRow/>}         
                 </TableHead>
                 <TableBody>
-                    {pantry['@controls'] !== undefined ? renderRows() : <TableRow/>}
+                    {pantry.items !== undefined ? renderRows() : <TableRow/>}
                 </TableBody>
                 </Table>
             </TableContainer>

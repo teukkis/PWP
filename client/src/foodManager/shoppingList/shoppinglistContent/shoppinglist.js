@@ -61,7 +61,7 @@ const ShoppingList = () => {
     useEffect( () => {
         dispatch( checkShoppingList() )
         
-    }, [])
+    }, [dispatch])
 
 
     const columns = [

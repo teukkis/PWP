@@ -6,7 +6,6 @@ import services from '../../../services'
 import { setShoppingLists } from '../shoppingListsRedux'
 import { setShoppingList } from '../shoppingListRedux'
 
-
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -21,7 +20,6 @@ import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper/Paper'
 import Typography from '@material-ui/core/Typography'
 import SaveIcon from '@material-ui/icons/Save';
-
 
 
 const useStyles = makeStyles((theme) => ({
@@ -135,7 +133,7 @@ const Shoppinglists = () => {
             })
         }
         
-    }, [profile, message])
+    }, [profile, message, dispatch, history, user])
 
     const rows = () => {
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, useParams } from "react-router-dom";
+import { Route } from "react-router-dom";
 
 import Shoppinglist from './shoppinglistContent/shoppinglist'
 import Shoppinglists from './shoppinglistContent/shoppinglists'
@@ -20,7 +20,6 @@ const useStyles = makeStyles((theme) => ({
 const ShoppinglistContainer = () => {
 
     const classes = useStyles()
-    const { user } = useParams()
 
     return (
         <div>

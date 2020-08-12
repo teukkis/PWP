@@ -72,7 +72,7 @@ const Profile = () => {
                 }
             })
         }
-    }, [profile])
+    }, [profile, history])
 
     const handleDelete = async ( event ) => {
         event.preventDefault()
