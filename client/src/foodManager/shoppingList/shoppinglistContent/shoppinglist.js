@@ -126,11 +126,19 @@ const ShoppingList = () => {
         const newItem = {
             fooditem_id: item.fooditem_id,
         }
+        console.log(addEndpoint)
+        console.log(addMethod)
+        console.log(newItem)
 
-        await services.sendData( addEndpoint, addMethod, newItem )
-        await services.getResource( delEndpoint, delMethod )
-        const data = await services.getResource( listEndpoint, "GET" )
-        dispatch( setShoppingList(data) )        
+        try {
+            await services.sendData( addEndpoint, addMethod, newItem )
+            await services.getResource( delEndpoint, delMethod )
+            const data = await services.getResource( listEndpoint, "GET" )
+            dispatch( setShoppingList(data) ) 
+        } catch (error) {
+            console.log(error)
+        }
+               
     }
 
     const renderRows = () => {

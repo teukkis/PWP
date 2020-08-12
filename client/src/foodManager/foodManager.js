@@ -16,6 +16,8 @@ import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Button from '@material-ui/core/Button';
+
 
 
 const drawerWidth = 240;
@@ -43,6 +45,11 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.default,
     padding: theme.spacing(3),
   },
+  logoutButton: {
+    marginLeft: 'auto',
+    fontWeight: 'bold'
+  },
+  
 }));
 
 
@@ -51,6 +58,11 @@ const FoodManager = () => {
     const history = useHistory()
     const profile = useSelector( state => state.profileReducer) //take the profile of the currently logged in user
     
+    const handleLogout = () => {
+      window.localStorage.removeItem('profile')  
+      history.push(`/api`)
+    }
+
     return (
         <div className={classes.root}>
             <CssBaseline />
@@ -59,6 +71,8 @@ const FoodManager = () => {
                     <Typography variant="h3" noWrap>
                         Food Manager
                     </Typography>
+                    
+                    <Button className={classes.logoutButton} size={'large'} color="inherit" onClick={handleLogout}>Logout</Button>
                 </Toolbar>
             </AppBar>
             <Drawer
