@@ -8,7 +8,7 @@
 and activate environment `. food_manager_env/bin/activate`. 
 3. Browse to the project root directory and run `pip install .` to install foodManager and its dependecies.
 4. Set environment variable: `export FLASK_APP=foodManager`.
-5. Initialize and populate database: `flask init-db` and `flask testgen`.
+5. Populated database `foodManager/dev.db` is supplied in the repo. But if you want to initialize and populate it, remove `dev.db` first. Then, initialize and populate database: `flask init-db` and `flask testgen`.
 6. Serve flask app: `flask run`.
 
 ### Running tests
@@ -16,7 +16,11 @@ and activate environment `. food_manager_env/bin/activate`.
 Unit and functional tests reside in `foodManager/tests`.
 To run these tests:
 1. Make sure you have pytest installed. If you don't, run `pip install pytest`
-2. Navigate to project root and run `pytest tests/`. 
+2. Navigate to project root and run `pytest tests/`.
+
+In case the above instructions give ModuleNotFoundError, you can try the following:
+1. Install pytest inside the environment: `pip install pytest`while the environment is activated.
+2. Inside the project root, run `python -m pytest tests/`
 
 # Food Manager Client
 
