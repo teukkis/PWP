@@ -1,0 +1,46 @@
+---
+name: Shopping Lists
+route: /api/redux/shoppingLists
+menu: Redux
+---
+
+import { Playground, Props } from 'docz';
+
+
+# Shopping Lists
+
+Includes two public functions, setShoppingLists() and checkShoppingLists().
+
+### setShoppingLists()
+
+Async function
+
+#### description
+
+Save the data to the local storage and redux store.
+
+#### output parameters
+
+Returns dispatch function, which is used to send data to the corresponging reducer.
+
+#### exceptions
+
+dispatch trying to return undefined, which raises an error.
+
+### checkShoppingLists()
+
+#### description
+
+Checks if needed controls are saved into the local storage.
+
+#### input parameters
+
+"Data", which includes the data received from server after succesfully retreived the shopping lists.
+
+#### output parameters
+
+Returns dispatch function, which is used to send data to the corresponging reducer.
+
+#### exceptions
+
+dispatch trying to return undefined, which raises an error.

@@ -1,0 +1,45 @@
+---
+name: Profile
+route: /api/redux/profile
+menu: Redux
+---
+
+import { Playground, Props } from 'docz';
+
+# Profile
+
+Includes two public functions, setProfile() and checkProfile().
+
+### setProfile()
+
+Async function
+
+#### description
+
+Save the data to the local storage and redux store.
+
+#### output parameters
+
+Returns dispatch function, which is used to send data to the corresponging reducer.
+
+#### exceptions
+
+dispatch trying to return undefined, which raises an error.
+
+### checkProfile()
+
+#### description
+
+Checks if needed controls are saved into the local storage. If not, user has not logged in through login page.
+
+#### input parameters
+
+"Data", which includes the data received from server after succesfull login.
+
+#### output parameters
+
+Returns dispatch function, which is used to send data to the corresponging reducer.
+
+#### exceptions
+
+dispatch trying to return undefined, which raises an error.

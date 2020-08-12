@@ -1,0 +1,46 @@
+---
+name: Pantry
+route: /api/redux/pantry
+menu: Redux
+---
+
+import { Playground, Props } from 'docz';
+
+
+# Pantry
+
+Includes two public functions, setPantry() and checkPantry().
+
+### setPantry()
+
+Async function
+
+#### description
+
+Save the data to the local storage and redux store.
+
+#### output parameters
+
+Returns dispatch function, which is used to send data to the corresponging reducer.
+
+#### exceptions
+
+dispatch trying to return undefined, which raises an error.
+
+### checkPantry()
+
+#### description
+
+Checks if needed controls are saved into the local storage. If not, user has not logged in through login page.
+
+#### input parameters
+
+"Data", which includes the data received from server after succesfully retreived the pantry.
+
+#### output parameters
+
+Returns dispatch function, which is used to send data to the corresponging reducer.
+
+#### exceptions
+
+dispatch trying to return undefined, which raises an error.

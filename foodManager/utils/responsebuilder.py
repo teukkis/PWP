@@ -11,7 +11,7 @@ class ResponseBuilder(MasonBuilder):
     #Controls for users
     def add_control_delete_user(self, username):
         self.add_control(
-            "foodman:delete",
+            "delete",
             url_for("api.useritem", username=username),
             method="DELETE",
             title="Delete this user"

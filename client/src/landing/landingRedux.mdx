@@ -1,0 +1,29 @@
+---
+name: Entry
+route: /api/redux/entry
+menu: Redux
+---
+
+import { Playground, Props } from 'docz';
+
+
+# Entry
+
+Includes two public functions, start() and checkControls().
+
+
+### start()
+
+Async function
+
+#### description
+
+Requests application entry point from the server. Saves received controls into the local storage and redux store.
+
+
+### checkControls()
+
+#### description
+
+Checks if needed controls are saved into the local storage already.
+If not, calls start action, which leads to the application entry point.

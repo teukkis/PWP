@@ -1,0 +1,59 @@
+---
+name: Login
+route: /api/login
+menu: Components
+---
+
+import { Playground, Props } from 'docz';
+
+
+# Login
+
+Includes two functions, handleLogin and handleRegister, textfields for username and email. 
+In addition, two buttons, one for login and one for register.
+
+
+### handleLogin()
+
+Async function
+
+#### description
+Calls function getResource, which sends a GET request to the server.
+
+In the previous state ( landing ), clicking the "start" button caused a request to the entry point of FoodManager API.
+All the controls received were stored in redux store for re-use.
+
+#### input parameters
+
+Takes an "event" parameter and uses redux store to get necessary controls information for the request.
+
+#### output parameters
+
+Doesn't return anything, but stores received controls into redux store and pushes a new location ( /api/users/{username})
+
+#### exceptions
+
+User not found, 404
+
+
+### handleRegister()
+
+Async function
+
+#### description
+
+Calls function sendData, which sends a POST request to the server.
+
+#### input parameters
+
+Takes an "event" parameter and uses redux store to get necessary controls information for the request.
+Needed information is method, endpoint and new user object.
+
+#### output parameters
+
+Doesn't return anything, but creates a new user to the database.
+
+#### exceptions
+
+Invalid JSON document, 400. Username or email is taken already, Already exists 409. Unsupported media type, 415
+

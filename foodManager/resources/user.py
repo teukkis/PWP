@@ -18,8 +18,12 @@ class UserCollection(Resource):
         body.add_control("self", url_for("api.usercollection"))
         body.add_control_add_user()
         for user in User.query.all():
-            item = {"username": user.username,
-                    "email": user.email}
+            item = MasonBuilder(
+                    username=user.username,
+                    email=user.email)
+            item.add_control("self", url_for(
+                                        "api.useritem",
+                                        username=user.username))
             body["items"].append(item)
 
         return Response(json.dumps(body), status=200, mimetype=MASON)
@@ -70,7 +74,7 @@ class UserItem(Resource):
         )
 
         body.add_namespace("foodman", "/foodmanager/link-relations/")
-        body.add_control("self", url_for("api.usercollection", username=username))
+        body.add_control("self", url_for("api.useritem", username=username))
         body.add_control("collection", url_for("api.usercollection"))
         body.add_control_edit_user(username)
         body.add_control_delete_user(username)
@@ -98,29 +102,37 @@ class UserItem(Resource):
         except ValidationError as error:
             return create_error_response(400, "Invalid JSON document", str(error))
 
-        found_user.username = request.json["username"]
-        found_user.email = request.json["email"]
+        new_username = request.json["username"]
+        new_email = request.json["email"]
+        found_user.username = new_username
+        found_user.email = new_email
 
-        body = ResponseBuilder(
-            username=found_user.username,
-            email=found_user.email
-        )
-
-        body.add_namespace("foodman", "/foodmanager/link-relations/")
-        body.add_control("self", url_for("api.useritem", username=username))
-        body.add_control("collection", url_for("api.usercollection"))
-        body.add_control_edit_user(username)
-        body.add_control_delete_user(username)
 
         try:
             db.session.commit()
-            return Response(json.dumps(body), 200, mimetype="application/vnd.mason+json")
 
         except IntegrityError:
             return create_error_response(
                 409, "Already exists",
-                "Username {} is taken, pick another one".format(username)
+                ("Username {} (or email {}) is "
+                "taken, pick another one".format(new_username, new_email))
             )
+
+        body = ResponseBuilder(
+            username=new_username,
+            email=new_email
+        )
+
+        body.add_namespace("foodman", "/foodmanager/link-relations/")
+        body.add_control(
+                "self",
+                url_for("api.useritem", username=new_username)
+                )
+        body.add_control("collection", url_for("api.usercollection"))
+        body.add_control_edit_user(new_username)
+        body.add_control_delete_user(new_username)
+
+        return Response(json.dumps(body), 200, mimetype="application/vnd.mason+json")
 
     def delete(self, username):
         found_user = User.query.filter_by(username=username).first()

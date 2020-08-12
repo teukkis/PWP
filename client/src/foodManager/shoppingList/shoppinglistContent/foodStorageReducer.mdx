@@ -1,0 +1,47 @@
+---
+name: Food Storage
+route: /api/redux/foodStorage
+menu: Redux
+---
+
+import { Playground, Props } from 'docz';
+
+
+# Food Storage
+
+
+Includes two public functions, sendFoodStorage() and checkFoodStorage().
+
+### sendFoodStorage()
+
+Async function
+
+#### description
+
+Save the data to the local storage and redux store.
+
+#### output parameters
+
+Returns dispatch function, which is used to send data to the corresponging reducer.
+
+#### exceptions
+
+dispatch trying to return undefined, which raises an error.
+
+### checkFoodStorage()
+
+#### description
+
+Checks if needed controls are saved into the local storage.
+
+#### input parameters
+
+"Data", which includes the data received from server after succesfully retreived the food storage.
+
+#### output parameters
+
+Returns dispatch function, which is used to send data to the corresponging reducer.
+
+#### exceptions
+
+dispatch trying to return undefined, which raises an error.

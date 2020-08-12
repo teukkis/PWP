@@ -17,13 +17,20 @@ class FoodItemCollection(Resource):
         body.add_control_create_fooditem()
         ingredients = FoodItem.query.all()
         for ingr in ingredients:
-            body["items"].append({"name": ingr.name, "type": ingr.type, "id": ingr.id})
+            ingr_item = ResponseBuilder(
+                    name=ingr.name,
+                    type=ingr.type,
+                    id=ingr.id
+                    )
+            ingr_item.add_control("self", url_for("api.fooditemitem", fooditem=ingr.name))
+            ingr_item.add_control("collection", url_for("api.fooditemcollection"))
+            body["items"].append(ingr_item)
 
         return Response(json.dumps(body), status=200, mimetype=MASON)
 
     def post(self):
         if not request.json:
-            create_error_response(
+            return create_error_response(
                 415,
                 "Unsupported media type",
                 "Requests must be JSON"
@@ -32,7 +39,7 @@ class FoodItemCollection(Resource):
         try:
             validate(request.json, FoodItem.get_schema())
         except ValidationError as error:
-            return create_error_response(400, "Invalid JSON document", str(error))
+            return create_error_response(415, "Invalid JSON document", str(error))
 
         item = FoodItem(name=request.json["name"])
         try:

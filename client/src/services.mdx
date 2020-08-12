@@ -1,0 +1,57 @@
+---
+name: Services
+route: /api/services
+menu: Services
+---
+
+import { Playground, Props } from 'docz';
+
+
+# Services
+
+Includes two public functions, getResource() and sendData().
+
+
+### getResource()
+
+Async function
+
+#### description
+
+All DELETE and GET requests use this function for retrieving data from the database.
+
+#### input parameters
+
+Endpoint and method.
+
+#### output parameters
+
+Returns JSON response from the server.
+
+#### exceptions
+
+404, not found.
+
+
+### sendData()
+
+Async function
+
+#### description
+
+All PUT and POST requests use this function for editing or creating items.
+
+
+#### input parameters
+
+Endpoint, method and data. Data will be send as a body of request.
+
+#### output parameters
+
+Returns JSON response from the server.
+
+
+#### exceptions
+
+Invalid JSON document, 400. Already exists 409. Unsupported media type, 415.
+

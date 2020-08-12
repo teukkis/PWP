@@ -1,0 +1,60 @@
+---
+name: ShoppingLists
+route: /api/shoppinglists
+menu: Components
+---
+
+import { Playground, Props } from 'docz';
+
+
+# Shopping Lists
+
+Includes four functions, handleDelete(), handleInspect(), addShoppinglist() and rows().
+
+### handleInspect()
+
+Async function
+
+#### description
+
+Calls function getResource(), which sends a GET request to the server.
+
+#### input parameters
+
+Takes "event", "href" and shopping list "name" as parameters. Pushes a new location after succesfull request.
+
+### handleDelete()
+
+Async function
+
+#### description
+
+Calls function getResource(), which sends a GET request to the server.
+
+#### input parameters
+
+Takes "event", "href" and shopping list "name" as parameters.
+
+### addShoppinglist()
+
+Async function
+
+#### description
+
+Calls function sendData(), which sends a POST request to the server.
+
+#### input parameters
+
+Takes an "event" parameter and uses redux store to get necessary controls information for the request.
+Needed information is method, endpoint and new shoppinglist object.
+
+#### output parameters
+
+Doesn't return anything, but creates a new shopping list to the database. And re-renders the page with changed information.
+
+### rows()
+
+#### description
+
+Renders a list of shoppinglist items and sets all the information to these items for later use. (Delete enpoint for example.)
+

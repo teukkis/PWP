@@ -1,0 +1,52 @@
+---
+name: Profile
+route: /api/profile
+menu: Components
+---
+
+import { Playground, Props } from 'docz';
+
+
+# Profile
+
+Includes two functions, handleDelete and handleEdit, textfields for username and email. 
+In addition, two buttons, one for login and one for register. Current username and email are displayed as well.
+
+
+### handleDelete()
+
+Async function
+
+#### description
+
+Calls function getResource(), which sends a DELETE request to the server.
+
+#### input parameters
+
+Takes an "event" parameter and uses redux store to get necessary controls information for the request.
+
+#### output parameters
+
+Doesn't return anything, but pushes a new location ( /api ), which is the starting point.
+
+### handleEdit()
+
+Async function
+
+#### description
+
+Calls function sendData(), which sends a PUT request to the server.
+
+#### input parameters
+
+Takes an "event" parameter and uses redux store to get necessary controls information for the request.
+Needed information is method, endpoint and new user object.
+
+#### output parameters
+
+Doesn't return anything, but creates a new user to the database. And re-renders the page with changed user information.
+
+#### exceptions
+
+Invalid JSON document, 400. Username or email is taken already, Already exists 409. Unsupported media type, 415
+
