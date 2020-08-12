@@ -24,14 +24,14 @@ To run these tests:
 Make sure you have node.js installed.
 
 1. clone or download the repository.
-2. cd to client folder
-3. npm install
-4. npm start (starts the development server on port 3000)
+2. `cd` to `client` folder
+3. `npm install`
+4. `npm start` (starts the development server on port 3000)
 
 ### Client documentation
 
-1. cd to client folder
-2. npm run docz:dev (documentation server runs on port 3001)
+1. `cd` to `client` folder
+2. `npm run docz:dev` (documentation server runs on port 3001)
 
 
 # Group information
