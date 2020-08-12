@@ -4,11 +4,12 @@
 ### Installation
 
 1. Clone or download the repository.
-2. If you want to use virtual environment run `virtualenv food_manager_env --python=python3`
+2. If you want to use virtual environment run `virtualenv food_manager_env --python=python3`.
 and activate environment `. food_manager_env/bin/activate`. 
 3. Browse to the project root directory and run `pip install .` to install foodManager and its dependecies.
 4. Set environment variable: `export FLASK_APP=foodManager`.
-5. Serve flask app: `flask run`.
+5. Initialize and populate database: `flask init-db` and `flask testgen`.
+6. Serve flask app: `flask run`.
 
 ### Running tests
 
