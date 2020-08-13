@@ -3,7 +3,7 @@ from jsonschema import validate, ValidationError
 from flask import Response, request, url_for
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
-from foodManager.models import User
+from foodManager.models import User, Pantry, ShoppingList
 from foodManager import db
 from foodManager.utils.responsebuilder import ResponseBuilder, create_error_response
 from foodManager.utils.masonbuilder import MasonBuilder
@@ -47,6 +47,18 @@ class UserCollection(Resource):
 
         try:
             db.session.add(user)
+            db.session.commit()
+            created_user = User.query.filter_by(username=request.json["username"]).first()
+            pantry = Pantry(
+                    owner_id=created_user.id,
+                    in_use=True
+                    )
+            shoppinglist = ShoppingList(
+                    owner_id=created_user.id,
+                    name="Default"
+                    )
+            db.session.add(pantry)
+            db.session.add(shoppinglist)
             db.session.commit()
         except IntegrityError as error:
             return create_error_response(
