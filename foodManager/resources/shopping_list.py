@@ -166,23 +166,21 @@ class ShoppingListItem(Resource):
 
         foundList = ShoppingList.query.join(User).filter(User.username == username, ShoppingList.name == name).first()
 
+        if not foundList:
+            return create_error_response(404, "Not found", "User with list not found")
+
+        fooditem = FoodItem.query.filter_by(id=request.json["fooditem_id"]).first()
+
+
         newShoppinglistFoodItem = ShoppingListFoodItem(
             shopping_list_id=request.json["shopping_list_id"],
             fooditem_id=request.json["fooditem_id"],
         )
+        db.session.add(newShoppinglistFoodItem)
+        db.session.commit()
 
-
-
-        try:
-            db.session.add(newShoppinglistFoodItem)
-            db.session.commit()
-        except IntegrityError:
-            return create_error_response(
-                409, "Already exists",
-                "Food item with the name '{}' already exists.".format(request.json["name"])
-            )
-
-        return Response(status=201)
+        return Response(status=201, headers={
+            "Location": url_for("api.shoppinglistfooditems", username=username, name=name, fooditem=fooditem.name)})
 
 
 
@@ -206,8 +204,18 @@ class ShoppingListItem(Resource):
         except ValidationError as error:
             return create_error_response(400, "Invalid JSON document", str(error))
 
-        foundList.name = request.json["name"]
-
+        user = User.query.filter_by(username=username).first()
+        usersLists = ShoppingList.query.filter_by(owner_id=user.id).all()
+        for ulist in usersLists:
+            if ulist.name == request.json["name"]:
+                return create_error_response(
+                    409, "Already exists",
+                    "You already have a list {}, pick another one".format(name)
+                )
+        else:
+            foundList.name = request.json["name"]
+            db.session.commit()
+        """
         try:
             db.session.commit()
         except IntegrityError:
@@ -215,6 +223,8 @@ class ShoppingListItem(Resource):
                 409, "Already exists",
                 "You already have a list {}, pick another one".format(name)
             )
+        """
+
 
     def delete(self, username, name):
         foundList = ShoppingList.query.join(User).filter(User.username == username, ShoppingList.name == name).first()

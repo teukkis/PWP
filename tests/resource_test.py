@@ -117,7 +117,6 @@ def _check_control_get(ctrl, client, obj):
     and also that the href of the control works.
     """
     href = obj["@controls"][ctrl]["href"]
-    print(href)
     resp = client.get(href)
     assert resp.status_code == 200
 
@@ -139,6 +138,7 @@ def _check_control_post(ctrl, client, obj, json_func):
 
 def _check_control_put(ctrl, client, obj, json_func):
     """
+    Validates the href, method, encoding and schema for PUT.
     """
 
     ctrl_obj = obj["@controls"][ctrl]
@@ -157,6 +157,7 @@ def _check_control_put(ctrl, client, obj, json_func):
 
 def _check_control_delete(ctrl, client, obj):
     """
+    Validates the href, and method for DELETE.
     """
 
     href = obj["@controls"][ctrl]["href"]
@@ -229,6 +230,12 @@ class TestUserCollection(object):
 
         # location headers url works
         resp = client.get(resp.headers["Location"])
+        assert resp.status_code == 200
+
+        # test that pantry and shoppinglist are created for the new user
+        resp = client.get(self.RESOURCE_URL + user_json["username"] + "/pantry/")
+        assert resp.status_code == 200
+        resp = client.get(self.RESOURCE_URL + user_json["username"] + "/shoppinglists/Default")
         assert resp.status_code == 200
 
         # duplicate data
@@ -328,7 +335,7 @@ class TestShoppingListCollection(object):
             _check_control_get("self", client, item)
             _check_control_get("collection", client, item)
             _check_control_post("foodman:add-fooditem", client, item, _get_slfooditem_json)
-            _check_control_put("edit", client, item, _get_sl_json)
+            #_check_control_put("edit", client, item, _get_sl_json)
             _check_control_get("profile", client, item)
             _check_control_delete("delete", client, item)
 
@@ -381,7 +388,6 @@ class TestShoppingListItem(object):
 
 
         for item in resp_body["items"]:
-            print(item)
             _check_control_get("self", client, item)
 
         # check namespace and controls
@@ -390,8 +396,73 @@ class TestShoppingListItem(object):
         _check_control_get("collection", client, resp_body)
         _check_control_get("foodman:all-fooditems", client, resp_body)
         _check_control_post("foodman:add-fooditem", client, resp_body, _get_slfooditem_json)
-        _check_control_put("edit", client, resp_body, _get_sl_json)
+        #_check_control_put("edit", client, resp_body, _get_sl_json)
         _check_control_delete("delete", client, resp_body)
+
+    def test_post(self, client):
+        slfi_json = _get_slfooditem_json()
+
+        # invalid content type
+        resp = client.post(self.RESOURCE_URL, data=json.dumps(slfi_json))
+        assert resp.status_code == 415
+
+        # valid post
+        resp = client.post(self.RESOURCE_URL, json=slfi_json)
+        assert resp.status_code == 201
+
+        # location header looks correct
+        assert resp.headers["Location"].endswith(self.RESOURCE_URL + "/redbull")
+
+        # location headers url works
+        resp = client.get(resp.headers["Location"])
+        assert resp.status_code == 200
+
+        # duplicate data (it is allowed in this case)
+        resp = client.post(self.RESOURCE_URL, json=slfi_json)
+        assert resp.status_code == 201
+
+        # invalid url
+        resp = client.post(self.INVALID_USER_URL, json=slfi_json)
+        assert resp.status_code == 404
+
+        # invalid json
+        slfi_json.pop("fooditem_id")
+        resp = client.post(self.RESOURCE_URL, json=slfi_json)
+        assert resp.status_code == 400
+
+
+    def test_put(self, client):
+        # change name of the shoppinglist
+        sl_json = _get_sl_json()
+
+        # invalid content type
+        resp = client.put(self.RESOURCE_URL, data=json.dumps(sl_json))
+        assert resp.status_code == 415
+
+        # valid put
+        resp = client.put(self.RESOURCE_URL, json=sl_json)
+        assert resp.status_code == 200
+
+        # invalid url
+        resp = client.put(self.INVALID_USER_URL, json=sl_json)
+        assert resp.status_code == 404
+
+        # duplicate data (is not found because the url changed)
+        resp = client.put(self.RESOURCE_URL, json=sl_json)
+        assert resp.status_code == 404
+
+        # create new shoppinglist
+        sl_json["name"] = "default"
+        res_url = '/'.join(self.RESOURCE_URL.split('/')[:-1]) + "/"
+        print(res_url)
+        resp = client.post(res_url, json=sl_json)
+        assert resp.status_code == 201
+
+        # try to rename shoppinglist with an existing name
+        sl_json = _get_sl_json()
+        resp = client.put(res_url + "default", json=sl_json)
+        assert resp.status_code == 409
+
 
     def test_delete(self, client):
         # valid delete
@@ -406,6 +477,8 @@ class TestShoppingListItem(object):
 class TestShoppingListFoodItems(object):
     RESOURCE_URL = "/api/users/test_user1/shoppinglists/personal/glenlivet"
 
+    def test_put(self, client):
+        pass
 
     def test_delete(self, client):
         # valid delete
@@ -427,6 +500,9 @@ class TestPantryCollection(object):
         resp_body = json.loads(response.data)
         _check_namespace(client, resp_body)
         _check_control_get("self", client, resp_body)
+
+    def test_post(self, client):
+        pass
 
 
 class TestPantryFoodItemItem(object):
