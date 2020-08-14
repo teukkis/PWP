@@ -87,7 +87,7 @@ const ShoppingList = () => {
                 quantity: Number(quantity),
                 unit: unit
             }
-
+console.log(newItem)
             await services.sendData( endpoint, method, newItem)
             const data = await services.getResource( shoppingListEndpoint )
             dispatch( setShoppingList(data) )

@@ -329,6 +329,7 @@ class ShoppingListFoodItems(Resource):
 
 
         foundItem.quantity=request.json["quantity"]
+        foundItem.unit=request.json["unit"]
         shopping_list_id=request.json["shopping_list_id"],
         fooditem_id=request.json["fooditem_id"]
 
